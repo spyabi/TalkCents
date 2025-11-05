@@ -1,3 +1,11 @@
+# Things to take note
+
+You might need to install JDK 17 for android version to run
+You might need to have a local.properties file under ./android/ if you do not have ANDROID_HOME set up
+You might need to add platform tools to path to run android for react native to use android debug bridge
+Moved the default App.tsx code to ./src/screens/Tutorial.tsx for reference
+Added .gitkeep placeholders to push folders
+
 This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
 
 # Getting Started
