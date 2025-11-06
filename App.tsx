@@ -4,7 +4,7 @@
  *
  * @format
  */
-import Tutorial from './src/screens/Tutorial';
+import BottomTabs from './src/navigation/BottomTabs';
 import { NewAppScreen } from '@react-native/new-app-screen';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import {
@@ -28,7 +28,7 @@ function AppContent() {
 
   return (
     <View style={styles.container}>
-      <Tutorial/>
+      <BottomTabs/>
     </View>
   );
 }
