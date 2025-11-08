@@ -1,5 +1,5 @@
 import React from 'react';
-import {StyleSheet } from 'react-native';
+import {View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { NavigationContainer } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -9,6 +9,7 @@ import HomeScreen from '../screens/HomeScreen';
 import InsightScreen from '../screens/InsightScreen';
 import LogScreen from '../screens/LogScreen';
 import SettingScreen from '../screens/SettingScreen';
+import FloatingButton from '../components/FloatingButton';
 
 const Tab = createBottomTabNavigator();
 
@@ -21,7 +22,7 @@ const ICONS: Record<string, string> = {
 
 export default function BottomTabs() {
   return (
-    <NavigationContainer>
+    <View style={{ flex: 1 }}>
       <Tab.Navigator
         screenOptions={({ route }) => ({
           tabBarIcon: ({ color, size }) => (
@@ -39,7 +40,9 @@ export default function BottomTabs() {
         <Tab.Screen name="Insights" component={InsightScreen} />
         <Tab.Screen name="Settings" component={SettingScreen} />
       </Tab.Navigator>
-    </NavigationContainer>
+      <FloatingButton/>
+    </View>
+
   );
 }
 
