@@ -24,6 +24,7 @@ export default function ChatBotScreen() {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const timerRef = useRef<NodeJS.Timer | null>(null);
+  const scrollViewRef = useRef<ScrollView>(null);
 
   const sendMessage = () => {
     if (message.trim()) {
@@ -37,6 +38,7 @@ export default function ChatBotScreen() {
           { text: 'This is a bot response', sender: 'bot' },
         ]);
       }, 500);
+      setInputHeight(40); // reset text input height
     }
   };
   const startRecording = () => {
@@ -91,7 +93,14 @@ export default function ChatBotScreen() {
       <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <View style={styles.inner}>
           {/* Chat messages */}
-          <ScrollView style={styles.chatContainer}>
+          <ScrollView
+            style={styles.chatContainer}
+            // flex end makes the msgs move to the bottom
+            contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', padding: 0}}
+            ref={scrollViewRef}
+            onContentSizeChange={() =>
+              scrollViewRef.current?.scrollToEnd({ animated: true })
+            }>
             {messages.map((msg, idx) => (
               <View
                 key={idx}
