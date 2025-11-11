@@ -116,44 +116,46 @@ export default function ChatBotScreen() {
           </ScrollView>
           {/* Input area */}
           <View style={styles.inputRow}>
-            <TouchableOpacity style={styles.iconButton}>
-              <Icon name="camera" size={30} color="#007AFF" />
-            </TouchableOpacity>
-
             {/*Text input / recording*/}
             {isRecording ? (
               // Recording UI
               <View style={styles.recordingContainer}>
                 <Text>Recording: {formatTime(recordingTime)}</Text>
                 <TouchableOpacity onPress={() => stopRecording()}>
-                  <Text>Stop</Text>
+                  <Text>Stop & Send</Text>
                 </TouchableOpacity>
                 <TouchableOpacity onPress={() => cancelRecording()}>
                   <Text>Cancel</Text>
                 </TouchableOpacity>
               </View>
             ) : (
-              // Text input UI
-              <TextInput
-                style={[styles.textInput, { height: Math.max(40, inputHeight) }]}
-                placeholder="Type a message"
-                value={message}
-                onChangeText={setMessage}
-                multiline
-                onContentSizeChange={(e) =>
-                  setInputHeight(e.nativeEvent.contentSize.height)
-                }
-              />
-            )}
+              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+                <TouchableOpacity style={styles.iconButton}>
+                  <Icon name="camera" size={30} color="#007AFF" />
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.iconButton}
-              onPress={() => {
-                if (message.trim()) sendMessage();
-                else startRecording();
-              }}>
-              <Icon name={message.trim() ? 'send-sharp' : 'mic'} size={30} color="#007AFF" />
-            </TouchableOpacity>
+                {/* Text input UI*/}
+                <TextInput
+                  style={[styles.textInput, { height: Math.max(40, inputHeight) }]}
+                  placeholder="Type a message"
+                  value={message}
+                  onChangeText={setMessage}
+                  multiline
+                  onContentSizeChange={(e) =>
+                    setInputHeight(e.nativeEvent.contentSize.height)
+                  }
+                />
+
+                <TouchableOpacity
+                  style={styles.iconButton}
+                  onPress={() => {
+                    if (message.trim()) sendMessage();
+                    else startRecording();
+                  }}>
+                  <Icon name={message.trim() ? 'send-sharp' : 'mic'} size={30} color="#007AFF" />
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
         </View>
       </TouchableWithoutFeedback>
