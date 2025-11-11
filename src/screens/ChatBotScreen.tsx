@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   View,
   KeyboardAvoidingView,
@@ -23,36 +23,65 @@ export default function ChatBotScreen() {
   const [inputHeight, setInputHeight] = useState(40);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-//   const timerRef = useRef<NodeJS.Timer | null>(null);
+  const timerRef = useRef<NodeJS.Timer | null>(null);
 
   const sendMessage = () => {
     if (message.trim()) {
-      setMessages([...messages, message.trim()]);
+      const newMessage: Message = { text: message.trim(), sender: 'user' };
+      setMessages([...messages, newMessage]);
       setMessage('');
+      // Simulate bot response after a short delay
+      setTimeout(() => {
+        setMessages(prev => [
+          ...prev,
+          { text: 'This is a bot response', sender: 'bot' },
+        ]);
+      }, 500);
     }
   };
   const startRecording = () => {
     setIsRecording(true);
     setRecordingTime(0);
-    // Optionally start a timer
-    recordingInterval = setInterval(() => {
-      setRecordingTime((prev) => prev + 1);
-    }, 1000);
+    //Timer
+    const startTime = Date.now();
+
+    timerRef.current = setInterval(() => {
+      const elapsed = Date.now() - startTime;
+      setRecordingTime(elapsed);
+    }, 100); // update every 100ms
 
     // Start actual audio recording with expo-av or react-native-audio
   };
 
   const stopRecording = () => {
     setIsRecording(false);
-    clearInterval(recordingInterval);
-    // Save the recording, reset timer
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+    // Save recording here
   };
 
   const cancelRecording = () => {
     setIsRecording(false);
-    clearInterval(recordingInterval);
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
     setRecordingTime(0);
-    // Discard recording
+    // Discard recording here
+  };
+
+  const formatTime = (ms: number) => {
+    const totalSeconds = Math.floor(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60)
+      .toString()
+      .padStart(2, '0');
+    const seconds = (totalSeconds % 60).toString().padStart(2, '0');
+    const centiseconds = Math.floor((ms % 1000) / 10)
+      .toString()
+      .padStart(2, '0');
+    return `${minutes}:${seconds}:${centiseconds}`;
   };
 
   return (
@@ -64,8 +93,15 @@ export default function ChatBotScreen() {
           {/* Chat messages */}
           <ScrollView style={styles.chatContainer}>
             {messages.map((msg, idx) => (
-              <View key={idx} style={styles.messageBubble}>
-                <Text>{msg}</Text>
+              <View
+                key={idx}
+                style={[
+                  styles.messageBubble,
+                  msg.sender === 'user'
+                    ? styles.userBubble
+                    : styles.botBubble,
+                ]}>
+                <Text>{msg.text}</Text>
               </View>
             ))}
           </ScrollView>
@@ -74,10 +110,12 @@ export default function ChatBotScreen() {
             <TouchableOpacity style={styles.iconButton}>
               <Icon name="attach-outline" size={30} color="#007AFF" />
             </TouchableOpacity>
+
+            {/*Text input / recording*/}
             {isRecording ? (
               // Recording UI
               <View style={styles.recordingContainer}>
-                <Text>Recording: {recordingTime}s</Text>
+                <Text>Recording: {formatTime(recordingTime)}</Text>
                 <TouchableOpacity onPress={() => stopRecording()}>
                   <Text>Stop</Text>
                 </TouchableOpacity>
@@ -103,7 +141,7 @@ export default function ChatBotScreen() {
               style={styles.iconButton}
               onPress={() => {
                 if (message.trim()) sendMessage();
-                else setIsRecording(true);
+                else startRecording();
               }}>
               <Icon name={message.trim() ? 'send-sharp' : 'mic'} size={30} color="#007AFF" />
             </TouchableOpacity>
@@ -130,10 +168,17 @@ const styles = StyleSheet.create({
   title: { fontSize: 18, fontWeight: '600', marginLeft: 8 },
   chatContainer: { flex: 1, padding: 12 },
   messageBubble: {
-    backgroundColor: '#E0E0E0',
     padding: 10,
     borderRadius: 12,
     marginBottom: 8,
+    maxWidth: '70%',
+  },
+  userBubble: {
+    backgroundColor: '#BAE7EC',
+    alignSelf: 'flex-end',
+  },
+  botBubble: {
+    backgroundColor: '#E0E0E0',
     alignSelf: 'flex-start',
   },
   inputRow: {
