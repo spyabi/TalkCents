@@ -4,6 +4,7 @@ import LoginPage from '../screens/LoginPage';
 import CreateAccountPage from '../screens/CreateAccountPage';
 import ForgotPasswordPage from '../screens/ForgotPasswordPage';
 import ChatBotScreen from '../screens/ChatBotScreen';
+import CameraScreen from '../screens/CameraScreen';
 import BottomTabs from './BottomTabs';
 
 const Stack = createNativeStackNavigator();
@@ -25,6 +26,16 @@ export default function AppStack() {
         headerStyle: { backgroundColor: '#E7E7E7' },
         headerTintColor: '#000',
       }}/>
+      <Stack.Screen
+        name="CameraScreen"
+        component={CameraScreen}
+        options={{
+          headerShown: true,
+          title: 'Camera',
+          headerTitleAlign: 'center',
+          headerStyle: { backgroundColor: '#E7E7E7' },
+          headerTintColor: '#000',
+        }}/>
     </Stack.Navigator>
   );
 }

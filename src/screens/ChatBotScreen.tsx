@@ -28,9 +28,10 @@ import Sound, {
 type Message = {
   id: string;
   sender: 'user' | 'bot';
-  type: 'text' | 'audio';
+  type: 'text' | 'audio' | 'image';
   text?: string;
   audioUri?: string;
+  imageBase64?: string;
 };
 
 export default function ChatBotScreen() {
@@ -195,6 +196,41 @@ export default function ChatBotScreen() {
       setPlayingId(null);
     });
   };
+
+  const requestCameraPermission = async () => {
+    if (Platform.OS === 'android') {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+        {
+          title: "Camera Permission",
+          message: "App needs access to your camera",
+          buttonNeutral: "Ask Me Later",
+          buttonNegative: "Cancel",
+          buttonPositive: "OK"
+        }
+      );
+      return granted === PermissionsAndroid.RESULTS.GRANTED;
+    }
+    return true; // iOS handles it in Info.plist
+  };
+
+  const openCameraScreen = async () => {
+    const hasPermission = await requestCameraPermission();
+    if (!hasPermission) return;
+    navigation.navigate('CameraScreen');
+  };
+
+  const handleSendImage = (uri: string) => {
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      sender: 'user',
+      type: 'image',
+      imageBase64: uri, // just store the URI directly
+    };
+
+    setMessages(prev => [...prev, newMessage]);
+    console.log('permissions', 'I AM DOING THIS FUNCTION')
+  };
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
@@ -249,7 +285,9 @@ export default function ChatBotScreen() {
               </View>
             ) : (
               <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-                <TouchableOpacity style={styles.iconButton}>
+                <TouchableOpacity
+                  onPress={() => openCameraScreen()}
+                  style={styles.iconButton}>
                   <Icon name="camera" size={30} color="#007AFF" />
                 </TouchableOpacity>
 
