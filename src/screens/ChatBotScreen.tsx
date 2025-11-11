@@ -11,39 +11,109 @@ import {
   Keyboard,
   ScrollView,
   TouchableOpacity,
+  PermissionsAndroid,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import Sound, {
+  AudioEncoderAndroidType,
+  AudioSourceAndroidType,
+  AVEncoderAudioQualityIOSType,
+  AVEncodingOption,
+  RecordBackType,
+  PlayBackType,
+} from 'react-native-nitro-sound';
 //https://reactnative.dev/docs/keyboardavoidingview
+
+type Message = {
+  id: string;
+  sender: 'user' | 'bot';
+  type: 'text' | 'audio';
+  text?: string;
+  audioUri?: string;
+};
 
 export default function ChatBotScreen() {
   const navigation = useNavigation();
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputHeight, setInputHeight] = useState(40);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const timerRef = useRef<NodeJS.Timer | null>(null);
   const scrollViewRef = useRef<ScrollView>(null);
 
-  const sendMessage = () => {
+  const [playingId, setPlayingId] = useState<string | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+
+  const getAndroidPermission = async () => {
+    if (Platform.OS === 'android') {
+      try {
+        const grants = await PermissionsAndroid.requestMultiple([
+          PermissionsAndroid.PERMISSIONS.WRITE_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.READ_EXTERNAL_STORAGE,
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        ]);
+
+        if (
+          grants['android.permission.WRITE_EXTERNAL_STORAGE'] ===
+            PermissionsAndroid.RESULTS.GRANTED &&
+          grants['android.permission.READ_EXTERNAL_STORAGE'] ===
+            PermissionsAndroid.RESULTS.GRANTED &&
+          grants['android.permission.RECORD_AUDIO'] ===
+            PermissionsAndroid.RESULTS.GRANTED
+        ) {
+          console.log('permissions','All permissions granted');
+        } else {
+          console.log('permissions','All required permissions not granted');
+          return;
+        }
+      } catch (err) {
+        console.warn('permissions', err);
+        return;
+      }
+    }
+  }
+
+  const sendMessage = async () => {
     if (message.trim()) {
-      const newMessage: Message = { text: message.trim(), sender: 'user' };
-      setMessages([...messages, newMessage]);
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        sender: 'user',
+        type: 'text',
+        text: message.trim(),
+      };
+      setMessages(prev => [...prev, newMessage]);
       setMessage('');
       // Simulate bot response after a short delay
       setTimeout(() => {
         setMessages(prev => [
           ...prev,
-          { text: 'This is a bot response', sender: 'bot' },
+          {
+            id: Date.now().toString(),
+            sender: 'bot',
+            type: 'text',
+            text: "This is a bot",
+          },
         ]);
       }, 500);
       setInputHeight(40); // reset text input height
     }
   };
-  const startRecording = () => {
+  const startRecording = async () => {
+    await getAndroidPermission();
     setIsRecording(true);
     setRecordingTime(0);
+    // Recording
+    // Set up recording progress listener
+    Sound.addRecordBackListener((e: RecordBackType) => {
+      console.log('Recording progress:', e.currentPosition, e.currentMetering);
+      console.log('permissions', e.currentPosition);
+      console.log('permissions', Sound.mmssss(Math.floor(e.currentPosition)));
+    });
+
+    const result = await Sound.startRecorder();
+    console.log('permissions', 'Recording started:', result);
     //Timer
     const startTime = Date.now();
 
@@ -52,19 +122,35 @@ export default function ChatBotScreen() {
       setRecordingTime(elapsed);
     }, 100); // update every 100ms
 
-    // Start actual audio recording with expo-av or react-native-audio
   };
 
-  const stopRecording = () => {
+  const stopRecording = async () => {
+    const result = await Sound.stopRecorder();
+    Sound.removeRecordBackListener();
+    console.log('permissions','Recording stopped:', result);
+    console.log('permissions','Audio saved at:', result);
     setIsRecording(false);
     if (timerRef.current) {
       clearInterval(timerRef.current);
       timerRef.current = null;
     }
     // Save recording here
+    // Add recorded audio as a message
+    if (result) {
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        sender: 'user',
+        type: 'audio',
+        audioUri: result, // path returned by Sound.stopRecorder()
+      };
+
+      setMessages(prev => [...prev, newMessage]);
+    }
   };
 
-  const cancelRecording = () => {
+  const cancelRecording = async () => {
+    // Stop recording if it’s still running
+    await nitroStopRecording({ discard: true });
     setIsRecording(false);
     if (timerRef.current) {
       clearInterval(timerRef.current);
@@ -86,6 +172,29 @@ export default function ChatBotScreen() {
     return `${minutes}:${seconds}:${centiseconds}`;
   };
 
+  const playAudio = async (uri: string, id: string) => {
+    if (playingId === id && isPlaying) {
+      // if already playing, pause it
+      await Sound.pausePlayer();
+      setIsPlaying(false);
+      return;
+    }
+
+    if (playingId !== id) {
+      // if switching to a new message, stop previous one
+      await Sound.stopPlayer();
+    }
+    setPlayingId(id);
+    setIsPlaying(true);
+
+    await Sound.startPlayer(uri);
+    Sound.setVolume(1);
+
+    Sound.addPlaybackEndListener(() => {
+      setIsPlaying(false);
+      setPlayingId(null);
+    });
+  };
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
@@ -110,7 +219,17 @@ export default function ChatBotScreen() {
                     ? styles.userBubble
                     : styles.botBubble,
                 ]}>
-                <Text>{msg.text}</Text>
+                {msg.type === 'text' ? (
+                  <Text style={styles.messageText}>{msg.text}</Text>
+                ) : (
+                  <TouchableOpacity onPress={() => playAudio(msg.audioUri!, msg.id)}>
+                    <Icon
+                        name={playingId === msg.id && isPlaying ? 'pause-circle' : 'play-circle'}
+                        size={40}
+                        color="#007AFF"
+                      />
+                  </TouchableOpacity>
+                )}
               </View>
             ))}
           </ScrollView>
