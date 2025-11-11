@@ -108,7 +108,7 @@ export default function ChatBotScreen() {
           {/* Input area */}
           <View style={styles.inputRow}>
             <TouchableOpacity style={styles.iconButton}>
-              <Icon name="attach-outline" size={30} color="#007AFF" />
+              <Icon name="camera" size={30} color="#007AFF" />
             </TouchableOpacity>
 
             {/*Text input / recording*/}
