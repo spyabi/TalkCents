@@ -1,9 +1,13 @@
 // utils/auth.ts
 import * as Keychain from 'react-native-keychain';
+import { NativeModules } from 'react-native';
+
 
 const API_URL = 'http://18.234.224.108:8000/api/user/login';
 
 export async function loginUser(email: string, password: string): Promise<string> {
+  console.log('permissions', 'Keychain module:', Keychain);
+  console.log('permissions', 'NativeModule Keychain:', NativeModules.RNKeychainManager);
   console.log('permissions', email, password);
   const response = await fetch(API_URL, {
     method: 'POST',
@@ -21,8 +25,8 @@ export async function loginUser(email: string, password: string): Promise<string
   const data = await response.json();
   const token = data.access_token;
   console.log('permissions', "I LOGGED IN", "TOKEN:", token)
-  // 🔒 Securely store token
-//   await Keychain.setGenericPassword('user', token);
+  // Securely store token
+  await Keychain.setGenericPassword('user', token, { service: 'TalkCentsAuthToken' });
   return token;
 }
 
