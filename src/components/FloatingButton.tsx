@@ -2,11 +2,14 @@ import React, { useState} from "react";
 import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
+import { useNavigation } from '@react-navigation/native';
+
 const FloatingButton = () => {
 
   const [icon_2_1] = useState(new Animated.Value(40));
   const [icon_2_2] = useState(new Animated.Value(40));
   const [icon_3] = useState(new Animated.Value(40));
+  const navigation = useNavigation();
 
   const [pop, setPop] = useState(false);
 
@@ -51,7 +54,7 @@ const FloatingButton = () => {
   return(
     <View style={styles.container}>
       <Animated.View style={[styles.circle, { bottom: icon_2_1, right: icon_2_2}]}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('ChatBot')}>
           <Icon name="android" size={30} color="#FFFF" />
         </TouchableOpacity>
       </Animated.View>
