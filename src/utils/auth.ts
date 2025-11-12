@@ -39,5 +39,16 @@ export async function getToken(): Promise<string | null> {
 }
 
 export async function logoutUser(): Promise<void> {
-  await Keychain.resetGenericPassword();
+  try {
+    const credentialsBefore = await Keychain.getGenericPassword({ service: 'TalkCentsAuthToken' });
+    console.log('permissions', 'MY TOKEN BEFORE:', credentialsBefore?.password);
+
+    // Reset / delete credentials
+    await Keychain.resetGenericPassword({ service: 'TalkCentsAuthToken' });
+
+    const credentialsAfter = await Keychain.getGenericPassword({ service: 'TalkCentsAuthToken' });
+    console.log('permissions', 'MY TOKEN AFTER:', credentialsAfter?.password); // should be undefined / null
+  } catch (error) {
+    console.error('Error logging out:', error);
+  }
 }
