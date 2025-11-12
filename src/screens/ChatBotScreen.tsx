@@ -5,6 +5,7 @@ import {
   TextInput,
   StyleSheet,
   Text,
+  Image,
   Platform,
   TouchableWithoutFeedback,
   Button,
@@ -46,6 +47,8 @@ export default function ChatBotScreen() {
 
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
+
+//   const [pendingImages, setPendingImages] = useState<Message[]>([]);
 
   const getAndroidPermission = async () => {
     if (Platform.OS === 'android') {
@@ -217,20 +220,34 @@ export default function ChatBotScreen() {
   const openCameraScreen = async () => {
     const hasPermission = await requestCameraPermission();
     if (!hasPermission) return;
-    navigation.navigate('CameraScreen');
+    navigation.navigate('CameraScreen', { onSendImage: handleSendImage });
   };
 
-  const handleSendImage = (uri: string) => {
-    const newMessage: Message = {
+  const handleSendImage = (uri: string, caption: string) => {
+    if (!uri) return;
+
+    const newMessageImage: Message = {
       id: Date.now().toString(),
       sender: 'user',
       type: 'image',
-      imageBase64: uri, // just store the URI directly
+      imageBase64: uri,
     };
 
-    setMessages(prev => [...prev, newMessage]);
-    console.log('permissions', 'I AM DOING THIS FUNCTION')
+    setMessages(prev => [...prev, newMessageImage]);
+
+    if (message.trim()) {
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        sender: 'user',
+        type: 'text',
+        text: message.trim(),
+      };
+      setMessages(prev => [...prev, newMessage]);
+    }
+
+    console.log('permissions', 'Image stored in setMessages');
   };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
@@ -257,7 +274,7 @@ export default function ChatBotScreen() {
                 ]}>
                 {msg.type === 'text' ? (
                   <Text style={styles.messageText}>{msg.text}</Text>
-                ) : (
+                ) : msg.type === 'audio' ? (
                   <TouchableOpacity onPress={() => playAudio(msg.audioUri!, msg.id)}>
                     <Icon
                         name={playingId === msg.id && isPlaying ? 'pause-circle' : 'play-circle'}
@@ -265,7 +282,24 @@ export default function ChatBotScreen() {
                         color="#007AFF"
                       />
                   </TouchableOpacity>
-                )}
+                ) : msg.type === 'image' ? (
+                  <TouchableOpacity
+                    onPress={() => {
+                      // Optional: navigate to a full-screen preview
+                      // navigation.navigate('ImagePreviewScreen', { uri: msg.imageBase64 });
+                    }}
+                  >
+                    <Image
+                      source={{ uri: `data:image/jpeg;base64,${msg.imageBase64}` }}
+                      style={{
+                        width: 120,
+                        height: 160,
+                        borderRadius: 12,
+                        marginVertical: 4,}}
+                      resizeMode="cover"
+                    />
+                  </TouchableOpacity>
+                ) : null }
               </View>
             ))}
           </ScrollView>
