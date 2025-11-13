@@ -235,14 +235,15 @@ export default function ChatBotScreen() {
 
     setMessages(prev => [...prev, newMessageImage]);
 
-    if (message.trim()) {
+    if (caption.trim()) {
       const newMessage: Message = {
         id: Date.now().toString(),
         sender: 'user',
         type: 'text',
-        text: message.trim(),
+        text: caption.trim(),
       };
       setMessages(prev => [...prev, newMessage]);
+      console.log('permissions', 'NEW MESSAGE SET');
     }
 
     console.log('permissions', 'Image stored in setMessages');
