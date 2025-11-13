@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import LoginPage from '../screens/LoginPage';
 import CreateAccountPage from '../screens/CreateAccountPage';
@@ -6,12 +6,30 @@ import ForgotPasswordPage from '../screens/ForgotPasswordPage';
 import ChatBotScreen from '../screens/ChatBotScreen';
 import CameraScreen from '../screens/CameraScreen';
 import BottomTabs from './BottomTabs';
+import LoadingSpinner from '../components/LoadingSpinner'
+import { checkLogin } from '../utils/auth';
 
 const Stack = createNativeStackNavigator();
 
 export default function AppStack() {
+  const [loading, setLoading] = useState(true);
+  const [initialRoute, setInitialRoute] = useState<'Login' | 'HomeTabs'>('Login');
+
+  useEffect(() => {
+    const verify = async () => {
+      console.log('permissions', "IM CHECkING LOGIN")
+      const token = await checkLogin();
+      console.log('permissions', 'my token here', token)
+      setInitialRoute(token ? 'HomeTabs' : 'Login');
+      setLoading(false);
+    };
+    verify();
+  }, []);
+
+  if (loading) return <LoadingSpinner/>;
+
   return (
-    <Stack.Navigator initialRouteName = "Login" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName = {initialRoute} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginPage} />
       <Stack.Screen name="CreateAccount" component={CreateAccountPage} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordPage} />
@@ -39,3 +57,4 @@ export default function AppStack() {
     </Stack.Navigator>
   );
 }
+

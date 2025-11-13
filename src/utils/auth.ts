@@ -3,13 +3,13 @@ import * as Keychain from 'react-native-keychain';
 import { NativeModules } from 'react-native';
 
 
-const API_URL = 'http://18.234.224.108:8000/api/user/login';
+const API_URL = 'http://18.234.224.108:8000/api/user';
 
 export async function loginUser(email: string, password: string): Promise<string> {
   console.log('permissions', 'Keychain module:', Keychain);
   console.log('permissions', 'NativeModule Keychain:', NativeModules.RNKeychainManager);
   console.log('permissions', email, password);
-  const response = await fetch(API_URL, {
+  const response = await fetch(`${API_URL}/login`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -30,8 +30,38 @@ export async function loginUser(email: string, password: string): Promise<string
   return token;
 }
 
+export async function checkLogin(): Promise<string | null> {
+  // Try to get the stored token
+  const storedToken = await getToken();
+
+  if (storedToken) {
+    try {
+      // Check if the token is valid by calling the verify endpoint
+      const response = await fetch(`${API_URL}/me`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${storedToken}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (response.ok) {
+        console.log('permissions', 'Token is valid!');
+        return storedToken; // token still valid
+      } else {
+        console.log('permissions', 'Stored token invalid, need login.');
+      }
+    } catch (err) {
+      console.warn('permissions', 'Error verifying token:', err);
+    }
+  }
+  return null;
+}
+
 export async function getToken(): Promise<string | null> {
-  const credentials = await Keychain.getGenericPassword();
+  console.log('permissions', "IM GETTING TOKEN")
+  const credentials = await Keychain.getGenericPassword({ service: 'TalkCentsAuthToken' });
+  console.log('permissions', "my credentials", credentials)
   if (credentials) {
     return credentials.password; // the token
   }
