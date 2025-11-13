@@ -25,14 +25,17 @@ import Sound, {
   PlayBackType,
 } from 'react-native-nitro-sound';
 //https://reactnative.dev/docs/keyboardavoidingview
+// import type { ChatHistory } from '../utils/chatbotAPI.ts';
+import { sendChatMessage, transcribeAudio } from '../utils/chatbotAPI.ts';
 
-type Message = {
-  id: string;
-  sender: 'user' | 'bot';
-  type: 'text' | 'audio' | 'image';
-  text?: string;
-  audioUri?: string;
-  imageBase64?: string;
+type MessageContent =
+  | { type: 'text'; text: string }
+  | { type: 'image_url'; image_url: { url: string } }
+  | { type: 'audio'; audioUri: string };
+
+export type Message = {
+  role: 'user' | 'assistant';
+  content: MessageContent[]
 };
 
 export default function ChatBotScreen() {
@@ -48,7 +51,8 @@ export default function ChatBotScreen() {
   const [playingId, setPlayingId] = useState<string | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
 
-//   const [pendingImages, setPendingImages] = useState<Message[]>([]);
+  const [chatHistory, setchatHistory] = useState<Message[]>([]);
+
 
   const getAndroidPermission = async () => {
     if (Platform.OS === 'android') {
@@ -82,28 +86,68 @@ export default function ChatBotScreen() {
   const sendMessage = async () => {
     if (message.trim()) {
       const newMessage: Message = {
-        id: Date.now().toString(),
-        sender: 'user',
-        type: 'text',
-        text: message.trim(),
+        role: 'user',
+        content: [{
+          type: 'text',
+          text: message.trim()
+        }]
       };
+      //use local variable to pass api call, react state updates only changes later
+      const updatedChatHistory = [...chatHistory, newMessage];
       setMessages(prev => [...prev, newMessage]);
+      setchatHistory(updatedChatHistory);
+      console.log('permissions', "I SET CHAT HISTORY");
+      console.log('permissions', messages);
+      console.log('permissions', chatHistory);
+      //reset the user message text box
       setMessage('');
-      // Simulate bot response after a short delay
-      setTimeout(() => {
-        setMessages(prev => [
-          ...prev,
-          {
-            id: Date.now().toString(),
-            sender: 'bot',
-            type: 'text',
-            text: "This is a bot",
-          },
-        ]);
-      }, 500);
       setInputHeight(40); // reset text input height
+      // 3. Send to API
+      await handleBotResponse(updatedChatHistory);
     }
   };
+  const handleBotResponse = async (updatedChatHistory: Message[]) => {
+    try {
+      const botResponse = await sendChatMessage(updatedChatHistory);
+
+      // 4. Add bot message to UI
+      if (botResponse?.response?.length) {
+        const newBotMessage: Message = {
+          role: 'assistant',
+          content: [{
+            type: 'text',
+            text: botResponse.response
+          }]
+        };
+        setMessages(prev => [...prev, newBotMessage]);
+        setchatHistory(prev => [...prev, newBotMessage]);
+      }
+      if (botResponse?.expense?.length) {
+        const expenseText = botResponse.expense
+          .map(exp => `${exp.name} - ${exp.category}: $${exp.price.toString()}`)
+          .join('\n'); // join each expense with a new line
+        const newBotExpense: Message = {
+          role: 'assistant',
+          content: [{
+            type: 'text',
+            text: expenseText
+          }]
+        };
+        setMessages(prev => [...prev, newBotExpense]);
+      }
+    } catch (err) {
+      const newBotError: Message = {
+        role: 'assistant',
+        content: [{
+          type: 'text',
+          text: "There was an issue getting your response, please try again"
+        }]
+      };
+      setMessages(prev => [...prev, newBotError]);
+      console.error('permissions', 'Error sending chat message:', err);
+    }
+  };
+
   const startRecording = async () => {
     await getAndroidPermission();
     setIsRecording(true);
@@ -142,15 +186,49 @@ export default function ChatBotScreen() {
     // Add recorded audio as a message
     if (result) {
       const newMessage: Message = {
-        id: Date.now().toString(),
-        sender: 'user',
-        type: 'audio',
-        audioUri: result, // path returned by Sound.stopRecorder()
+        role: 'user',
+        content: [{
+          type: 'audio',
+          audioUri: result
+        }]
       };
 
       setMessages(prev => [...prev, newMessage]);
+      handleRecordedAudio(result);
     }
   };
+
+  const handleRecordedAudio = async (audioUri: string) => {
+    try {
+      // Transcribe audio
+      const transcription = await transcribeAudio(audioUri);
+      console.log('permissions', "MY TRANSCRIPTION", transcription)
+
+      // Create message from transcription
+      const newMessage: Message = {
+        role: 'user',
+        content: [{
+          type: 'text',
+          text: transcription.transcription
+        }]
+      };
+      const updatedChatHistory = [...chatHistory, newMessage];
+      setchatHistory(updatedChatHistory);
+
+      await handleBotResponse(updatedChatHistory);
+    } catch (err) {
+      const newBotError: Message = {
+        role: 'assistant',
+        content: [{
+          type: 'text',
+          text: "There was an issue getting your response, please try again"
+        }]
+      };
+      setMessages(prev => [...prev, newBotError]);
+      console.log('permissions', 'Error handling recorded audio:', err);
+    }
+  };
+
 
   const cancelRecording = async () => {
     // Stop recording if it’s still running
@@ -176,19 +254,19 @@ export default function ChatBotScreen() {
     return `${minutes}:${seconds}:${centiseconds}`;
   };
 
-  const playAudio = async (uri: string, id: string) => {
-    if (playingId === id && isPlaying) {
+  const playAudio = async (uri: string) => {
+    if (playingId === uri && isPlaying) {
       // if already playing, pause it
       await Sound.pausePlayer();
       setIsPlaying(false);
       return;
     }
 
-    if (playingId !== id) {
+    if (playingId !== uri) {
       // if switching to a new message, stop previous one
       await Sound.stopPlayer();
     }
-    setPlayingId(id);
+    setPlayingId(uri);
     setIsPlaying(true);
 
     await Sound.startPlayer(uri);
@@ -226,25 +304,25 @@ export default function ChatBotScreen() {
   const handleSendImage = (uri: string, caption: string) => {
     if (!uri) return;
 
-    const newMessageImage: Message = {
-      id: Date.now().toString(),
-      sender: 'user',
-      type: 'image',
-      imageBase64: uri,
+    const imageContent: MessageContent = {
+      type: 'image_url',
+      image_url: { url: `data:image/jpeg;base64,${uri}` },
     };
+    // Create optional caption content (text)
+    console.log('permissions', caption)
+    const messageContent: MessageContent | null = caption.trim()
+      ? { type: 'text', text: caption.trim() }
+      : null;
 
-    setMessages(prev => [...prev, newMessageImage]);
-
-    if (caption.trim()) {
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        sender: 'user',
-        type: 'text',
-        text: caption.trim(),
-      };
-      setMessages(prev => [...prev, newMessage]);
-      console.log('permissions', 'NEW MESSAGE SET');
-    }
+    // Construct final Message for chatHistory
+    const newMessage: Message = {
+      role: 'user',
+      content: messageContent ? [imageContent, messageContent] : [imageContent],
+    };
+    setMessages(prev => [...prev, newMessage]);
+    const updatedChatHistory = [...chatHistory, newMessage];
+    setchatHistory(updatedChatHistory);
+    handleBotResponse(updatedChatHistory);
 
     console.log('permissions', 'Image stored in setMessages');
   };
@@ -269,37 +347,44 @@ export default function ChatBotScreen() {
                 key={idx}
                 style={[
                   styles.messageBubble,
-                  msg.sender === 'user'
+                  msg.role === 'user'
                     ? styles.userBubble
                     : styles.botBubble,
                 ]}>
-                {msg.type === 'text' ? (
-                  <Text style={styles.messageText}>{msg.text}</Text>
-                ) : msg.type === 'audio' ? (
-                  <TouchableOpacity onPress={() => playAudio(msg.audioUri!, msg.id)}>
+                {msg.content[0].type === 'text' ? (
+                  <Text style={styles.messageText}>{msg.content[0].text}</Text>
+                ) : msg.content[0].type === 'audio' ? (
+                  <TouchableOpacity onPress={() => playAudio(msg.content[0].audioUri!)}>
                     <Icon
-                        name={playingId === msg.id && isPlaying ? 'pause-circle' : 'play-circle'}
+                        name={playingId === msg.content[0].audioUri && isPlaying ? 'pause-circle' : 'play-circle'}
                         size={40}
                         color="#007AFF"
                       />
                   </TouchableOpacity>
-                ) : msg.type === 'image' ? (
-                  <TouchableOpacity
-                    onPress={() => {
-                      // Optional: navigate to a full-screen preview
-                      // navigation.navigate('ImagePreviewScreen', { uri: msg.imageBase64 });
-                    }}
-                  >
-                    <Image
-                      source={{ uri: `data:image/jpeg;base64,${msg.imageBase64}` }}
-                      style={{
-                        width: 120,
-                        height: 160,
-                        borderRadius: 12,
-                        marginVertical: 4,}}
-                      resizeMode="cover"
-                    />
-                  </TouchableOpacity>
+                ) : msg.content[0].type === 'image_url' ? (
+                  <>
+                    <TouchableOpacity
+                      onPress={() => {
+                        // Optional: navigate to a full-screen preview
+                        // navigation.navigate('ImagePreviewScreen', { uri: msg.imageBase64 });
+                      }}
+                    >
+                      <Image
+                        source={{ uri: msg.content[0].image_url.url }}
+                        style={{
+                          width: 120,
+                          height: 160,
+                          borderRadius: 12,
+                          marginVertical: 4,}}
+                        resizeMode="cover"
+                      />
+                    </TouchableOpacity>
+                    {msg.content[1]?.type === 'text' && (
+                      <Text style={styles.messageText}>
+                        {msg.content[1].text}
+                      </Text>
+                    )}
+                  </>
                 ) : null }
               </View>
             ))}

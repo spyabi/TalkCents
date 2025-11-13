@@ -1,10 +1,11 @@
 import React from 'react';
-import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { View, ActivityIndicator, StyleSheet, Text } from 'react-native';
 
 export default function LoadingSpinner() {
   return (
     <View style={styles.container}>
       <ActivityIndicator size="large" color="#007AFF" />
+      <Text>Trying to Connect to the Internet</Text>
     </View>
   );
 }
