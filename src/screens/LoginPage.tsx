@@ -2,11 +2,25 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { loginUser } from '../utils/auth';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import  AuthStackParamList from '../navigation/AppStack';
+
+// ---- Route names for the navigator that owns LoginPage ----
+type AuthStackParamList = {
+  Login: undefined;
+  HomeTabs: undefined;
+  ForgotPassword: undefined;
+  CreateAccount: undefined;
+  Chatbot: undefined;
+};
+
+// Props for this screen
+type Props = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 
 const { width } = Dimensions.get('window');
 const { height } = Dimensions.get('window');
 
-export default function LoginPage({ navigation }) {
+export default function LoginPage({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
@@ -170,5 +184,12 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
     textDecorationLine: 'underline'
+  },
+  error: {
+    color: '#ff3b30',          // red
+    textAlign: 'center',
+    marginBottom: 8,
+    fontSize: 14,
+    fontWeight: '500',
   },
 });
