@@ -35,9 +35,9 @@ export default function BottomTabs() {
           tabBarItemStyle: styles.tabBarItemStyle
         })}
       >
-        <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Log" component={LogScreen} />
         <Tab.Screen name="Insights" component={InsightScreen} />
+        <Tab.Screen name="Log" component={LogScreen} />
+        <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Settings" component={SettingScreen} />
       </Tab.Navigator>
       <FloatingButton/>
