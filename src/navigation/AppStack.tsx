@@ -8,7 +8,7 @@ import ForgotPasswordPage from '../screens/ForgotPasswordPage';
 import BottomTabs from './BottomTabs';
 import ManualEntryPage from '../screens/ManualEntryPage';
 import { Transaction } from '../context/TransactionsContext';
-// import LogScreen from '../screens/LogScreen';
+import LogScreen from '../screens/LogScreen';
 // import ChatBotScreen from '../screens/ChatBotScreen';
 // import CameraScreen from '../screens/CameraScreen';
 import CategoryEditor from '../screens/CategoryEditor';
@@ -19,7 +19,10 @@ export type AuthStackParamList = {
    Login: undefined; 
    CreateAccount: undefined; 
    ForgotPassword: undefined; 
-   HomeTabs: undefined; 
+   HomeTabs: {
+    screen: keyof import("../navigation/BottomTabs").BottomTabParamList;
+    params?: object;
+  } | undefined;
    ChatBot: undefined;
    CameraScreen: undefined;
    CategoryEditor: { type: 'income' | 'expense' };

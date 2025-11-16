@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowRadius: 10,
     elevation: 2,
+    paddingBottom: 20,
   },
   tabBarItemStyle: {
 //     justifyContent: "center",

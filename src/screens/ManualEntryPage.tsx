@@ -7,6 +7,7 @@ import Icon from "react-native-vector-icons/Ionicons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
 // import LogScreen from "./LogScreen";
+// import HomeTabs from "../navigation/BottomTabs";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "ManualEntry">;
 
@@ -436,11 +437,14 @@ const validateFields = () => {
           setShowSuccess(false);
 
           // Go to correct month on LogScreen
-          navigation.navigate("LogScreen", {
-            recentDate: selectedDate.toISOString(),
-            justAddedId: lastSavedId ?? undefined,
-          });
-        }}
+          navigation.navigate("HomeTabs", {
+            screen: "LogScreen", 
+            params: {
+              recentDate: selectedDate.toISOString(),
+              justAddedId: lastSavedId ?? undefined,
+          },
+        });
+      }}
       >
         <Text style={styles.successDoneText}>Done</Text>
       </TouchableOpacity>
