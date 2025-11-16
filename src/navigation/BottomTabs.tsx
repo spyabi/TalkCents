@@ -11,16 +11,27 @@ import LogScreen from '../screens/LogScreen';
 import SettingScreen from '../screens/SettingScreen';
 import FloatingButton from '../components/FloatingButton';
 
-const Tab = createBottomTabNavigator();
+export type BottomTabParamList = {
+  Home: undefined;
+  LogScreen: undefined;
+  Insights: undefined;
+  Settings: undefined;
+};
+
+
+// const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<BottomTabParamList>();
+
 
 const ICONS: Record<string, string> = {
   Home: 'home',
-  Log: 'reader',
+  LogScreen: 'reader',
   Insights: 'analytics',
   Settings: 'settings',
 };
 
 export default function BottomTabs() {
+  
   return (
     <View style={{ flex: 1 }}>
       <Tab.Navigator
@@ -35,6 +46,8 @@ export default function BottomTabs() {
           tabBarItemStyle: styles.tabBarItemStyle
         })}
       >
+        <Tab.Screen name="Home" component={HomeScreen} />
+        <Tab.Screen name="Log" component={LogScreen} />
         <Tab.Screen name="Insights" component={InsightScreen} />
         <Tab.Screen name="Log" component={LogScreen} />
         <Tab.Screen name="Home" component={HomeScreen} />

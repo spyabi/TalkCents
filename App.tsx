@@ -5,20 +5,22 @@
  * @format
  */
 import { NewAppScreen } from '@react-native/new-app-screen';
-import { StatusBar, StyleSheet, useColorScheme, View} from 'react-native';
+import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import {
   SafeAreaProvider,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
-// import Icon from 'react-native-vector-icons/Ionicons';
-// import FloatingButton from './src/components/FloatingButton';
-// import LoginPage from './src/screens/LoginPage';
-// import BottomTabs from './src/navigation/BottomTabs';
+import Icon from 'react-native-vector-icons/Ionicons';
+import FloatingButton from './src/components/FloatingButton';
+import LoginPage from './src/screens/LoginPage';
+import BottomTabs from './src/navigation/BottomTabs';
 import AppStack from './src/navigation/AppStack';
+import { TransactionsProvider } from './src/context/TransactionsContext';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';
+  Icon.loadFont();
 
   return (
     <SafeAreaProvider>
@@ -33,14 +35,14 @@ function AppContent() {
 
   return (
     <View style={styles.container}>
-      {/*}
-      <LoginPage/>
-      <BottomTabs/>
-      <FloatingButton/>
-      */}
-      <NavigationContainer>
-        <AppStack />
-      </NavigationContainer>
+      {/* <LoginPage/> */}
+      {/* <BottomTabs/>
+      <FloatingButton/> */}
+      <TransactionsProvider>
+        <NavigationContainer>
+          <AppStack />
+        </NavigationContainer>
+      </TransactionsProvider>
     </View>
   );
 }
