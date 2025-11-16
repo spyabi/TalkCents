@@ -3,11 +3,11 @@ import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from "rea
 import Icon from "react-native-vector-icons/Ionicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { useRoute, RouteProp} from "@react-navigation/native";
-import { AppStackParamList } from "../navigation/AppStack";
+import { AuthStackParamList } from "../navigation/AppStack";
 import { useTransactions, Transaction } from "../context/TransactionsContext";
 import FloatingButton from "../components/FloatingButton";
 
-type Props = NativeStackScreenProps<AppStackParamList, "LogScreen">;
+type Props = NativeStackScreenProps<AuthStackParamList, "LogScreen">;
 
 
 
@@ -67,7 +67,7 @@ const handleDelete = (id: string) => {
 
   const monthLabel = `${monthNames[selectedMonth]} ${selectedYear}`;
 
-  type LogScreenRouteProp = RouteProp<AppStackParamList, "LogScreen">;
+  type LogScreenRouteProp = RouteProp<AuthStackParamList, "LogScreen">;
   const route = useRoute<LogScreenRouteProp>();
 React.useEffect(() => {
   const recent = route.params?.recentDate;

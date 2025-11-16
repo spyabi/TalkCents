@@ -40,16 +40,14 @@ export default function BottomTabs() {
             <Icon name={ICONS[route.name]} size={size} color={color} />
           ),
           tabBarActiveTintColor: '#007AFF',
-          tabBarInactiveTintColor: '000000',
+          tabBarInactiveTintColor: '#000000',
           headerShown: false,
           tabBarStyle: styles.tabBar,
           tabBarItemStyle: styles.tabBarItemStyle
         })}
       >
-        <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Log" component={LogScreen} />
         <Tab.Screen name="Insights" component={InsightScreen} />
-        <Tab.Screen name="Log" component={LogScreen} />
+        <Tab.Screen name="LogScreen" component={LogScreen} />
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Settings" component={SettingScreen} />
       </Tab.Navigator>

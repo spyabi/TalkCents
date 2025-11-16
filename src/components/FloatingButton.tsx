@@ -4,16 +4,15 @@ import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import type { AppStackParamList } from "../navigation/AppStack";
+import type { AuthStackParamList } from "../navigation/AppStack";
 
-
+type Nav = NativeStackNavigationProp<AuthStackParamList>;
 
 const FloatingButton = () => {
-  const navigation = useNavigation<NativeStackNavigationProp<AppStackParamList>>();
+  const navigation = useNavigation<Nav>();
   const [icon_2_1] = useState(new Animated.Value(40));
   const [icon_2_2] = useState(new Animated.Value(40));
   const [icon_3] = useState(new Animated.Value(40));
-  const navigation = useNavigation();
 
   const [pop, setPop] = useState(false);
 

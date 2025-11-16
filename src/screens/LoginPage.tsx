@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, Alert } from 'react-native';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { loginUser } from '../utils/auth';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import  AuthStackParamList from '../navigation/AppStack';
 
 // ---- Route names for the navigator that owns LoginPage ----
 type AuthStackParamList = {
@@ -22,28 +20,8 @@ const { width } = Dimensions.get('window');
 const { height } = Dimensions.get('window');
 
 export default function LoginPage({ navigation }: Props) {
-export default function LoginPage({ navigation }: Props) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-
-  const handleLogin = async () => {
-    console.log('permissions', "I TRYING TO LOG IN ");
-    try {
-      const token = await loginUser(email, password);
-      if (token) {
-        // ✅ Once logged in, reset navigation to HomeTabs
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'HomeTabs' }],
-        });
-      }
-    } catch (err) {
-      console.log('permissions', err);
-      setError('Invalid credentials');
-      Alert.alert('Login Failed', 'Invalid email or password');
-    }
-  };
   const [error, setError] = useState('');
 
   const handleLogin = async () => {
@@ -103,8 +81,7 @@ export default function LoginPage({ navigation }: Props) {
         </View>
         {error ? <Text style={styles.error}>{error}</Text> : null}
         <TouchableOpacity style={styles.button} onPress={handleLogin}>
-        {error ? <Text style={styles.error}>{error}</Text> : null}
-        <TouchableOpacity style={styles.button} onPress={handleLogin}>
+
           <Text style={styles.buttonText}>Login</Text>
         </TouchableOpacity>
 
@@ -207,13 +184,6 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     fontSize: 14,
     textDecorationLine: 'underline'
-  },
-  error: {
-    color: '#ff3b30',          // red
-    textAlign: 'center',
-    marginBottom: 8,
-    fontSize: 14,
-    fontWeight: '500',
   },
   error: {
     color: '#ff3b30',          // red

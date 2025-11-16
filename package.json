@@ -17,7 +17,6 @@
     "@react-navigation/native-stack": "^7.6.2",
     "react": "19.1.1",
     "react-native": "0.82.1",
-    "react-native-date-picker": "^5.0.13",
     "react-native-gesture-handler": "^2.29.1",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-keychain": "^10.0.0",

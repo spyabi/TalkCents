@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput, Keyboard, InputAccessoryView, Platform, Alert } from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet, TextInput, Keyboard, InputAccessoryView, Platform, Alert } from "react-native";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { AppStackParamList } from "../navigation/AppStack";
+import { AuthStackParamList } from "../navigation/AppStack";
 import { useTransactions, Transaction } from "../context/TransactionsContext";
 import Icon from "react-native-vector-icons/Ionicons";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { KeyboardAwareScrollView } from "react-native-keyboard-aware-scroll-view";
-import LogScreen from "./LogScreen";
+// import LogScreen from "./LogScreen";
 
-
-
-
-
-type Props = NativeStackScreenProps<AppStackParamList, "ManualEntry">;
+type Props = NativeStackScreenProps<AuthStackParamList, "ManualEntry">;
 
 export default function ManualEntryPage({ navigation, route }: Props) {
   const { categories, addTransaction, addCategory, editTransaction } = useTransactions();
@@ -29,7 +25,9 @@ export default function ManualEntryPage({ navigation, route }: Props) {
   const [showCategoryPicker, setShowCategoryPicker] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showSuccess, setShowSuccess] = useState(false);
-
+ 
+  // top of component
+  const [lastSavedId, setLastSavedId] = useState<string | null>(null);
 
 // Create-category form fields
 const [newCategoryName, setNewCategoryName] = useState("");
@@ -292,6 +290,7 @@ const validateFields = () => {
   }
 
   // Show modal instead of navigating
+  setLastSavedId(tx.id);   
   setShowSuccess(true);
 
 }}
@@ -439,6 +438,7 @@ const validateFields = () => {
           // Go to correct month on LogScreen
           navigation.navigate("LogScreen", {
             recentDate: selectedDate.toISOString(),
+            justAddedId: lastSavedId ?? undefined,
           });
         }}
       >
