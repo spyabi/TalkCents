@@ -16,7 +16,7 @@ import FloatingButton from './src/components/FloatingButton';
 import LoginPage from './src/screens/LoginPage';
 import BottomTabs from './src/navigation/BottomTabs';
 import AppStack from './src/navigation/AppStack';
-import { TransactionsProvider } from './src/context/TransactionsContext';
+import { TransactionsProvider } from './src/utils/TransactionsContext';
 
 function App() {
   const isDarkMode = useColorScheme() === 'dark';

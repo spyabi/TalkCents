@@ -1,10 +1,10 @@
-import React, { useState} from "react";
+import React, { useState } from "react";
 import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useRoute, RouteProp} from "@react-navigation/native";
+import { useRoute, RouteProp } from "@react-navigation/native";
 import { AuthStackParamList } from "../navigation/AppStack";
-import { useTransactions, Transaction } from "../context/TransactionsContext";
+import { useTransactions, Transaction } from "../utils/TransactionsContext";
 import FloatingButton from "../components/FloatingButton";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "LogScreen">;
@@ -17,20 +17,20 @@ export default function LogScreen({ navigation }: Props) {
 
 
 
-const handleDelete = (id: string) => {
-  Alert.alert(
-    "Delete Entry",
-    "Are you sure you want to delete this transaction?",
-    [
-      { text: "Cancel", style: "cancel" },
-      {
-        text: "Delete",
-        style: "destructive",
-        onPress: () => deleteTransaction(id),
-      },
-    ]
-  );
-};
+  const handleDelete = (id: string) => {
+    Alert.alert(
+      "Delete Entry",
+      "Are you sure you want to delete this transaction?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => deleteTransaction(id),
+        },
+      ]
+    );
+  };
 
 
 
@@ -69,15 +69,15 @@ const handleDelete = (id: string) => {
 
   type LogScreenRouteProp = RouteProp<AuthStackParamList, "LogScreen">;
   const route = useRoute<LogScreenRouteProp>();
-React.useEffect(() => {
-  const recent = route.params?.recentDate;
+  React.useEffect(() => {
+    const recent = route.params?.recentDate;
 
-  if (recent) {
-    const d = new Date(recent);
-    setSelectedMonth(d.getMonth());
-    setSelectedYear(d.getFullYear());
-  }
-}, [route.params?.recentDate]);
+    if (recent) {
+      const d = new Date(recent);
+      setSelectedMonth(d.getMonth());
+      setSelectedYear(d.getFullYear());
+    }
+  }, [route.params?.recentDate]);
 
 
 
@@ -99,20 +99,20 @@ React.useEffect(() => {
 
   //  GROUPING 
   const grouped = filtered.reduce((acc: Record<string, Transaction[]>, t) => {
-  const d = new Date(t.date);
-  const dateKey = d.toDateString();  // <-- ALWAYS SAME FORMAT
+    const d = new Date(t.date);
+    const dateKey = d.toDateString();  // <-- ALWAYS SAME FORMAT
 
-  if (!acc[dateKey]) acc[dateKey] = [];
-  acc[dateKey].push(t);
-  
-  return acc;
-}, {});
+    if (!acc[dateKey]) acc[dateKey] = [];
+    acc[dateKey].push(t);
+
+    return acc;
+  }, {});
 
 
   const sortedDates = Object.keys(grouped).sort(
     (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
-  
+
 
   return (
     <View style={styles.container}>
@@ -157,64 +157,64 @@ React.useEffect(() => {
         </View>
 
         {/* GROUPED LIST */}
-  {filtered.length === 0 ? (
-    <View style={styles.emptyContainer}>
-    <Text style={styles.emptyText}>No transactions this month.</Text>
-    </View>
-  ) : (
-    <View style={styles.monthContainer}>
-      {sortedDates.map((date) => {
-      const items = grouped[date];
-      const d = new Date(date);
-
-      return (
-    <View key={date} style={styles.groupContainer}>
-
-      <Text style={styles.groupHeader}>
-        {d.toLocaleDateString("en-US", {
-          weekday: "long",
-          month: "short",
-          day: "numeric",
-        })}
-      </Text>
-
-      {items.map((item) => (
-        <View key={item.id} style={styles.card}>
-          <View style={styles.cardLeft}>
-            <Text style={styles.cardTitle}>{item.name}</Text>
-            <Text style={styles.cardCategory}>
-              {item.category?.icon} {item.category?.name}
-            </Text>
+        {filtered.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No transactions this month.</Text>
           </View>
+        ) : (
+          <View style={styles.monthContainer}>
+            {sortedDates.map((date) => {
+              const items = grouped[date];
+              const d = new Date(date);
 
-          <View style={styles.cardRight}>
-            <Text
-              style={[
-                item.type === "Income"
-                  ? styles.incomeValue
-                  : styles.expenseValue,
-              ]}
-            >
-              ${item.amount}
-            </Text>
+              return (
+                <View key={date} style={styles.groupContainer}>
 
-            <TouchableOpacity
-              onPress={() => navigation.navigate("ManualEntry", { item })}
-            >
-              <Icon name="pencil" size={20} style={styles.editIcon} />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => handleDelete(item.id)}>
-    <Icon name="trash" size={20} color="red" style={styles.deleteIcon} />
-  </TouchableOpacity>
+                  <Text style={styles.groupHeader}>
+                    {d.toLocaleDateString("en-US", {
+                      weekday: "long",
+                      month: "short",
+                      day: "numeric",
+                    })}
+                  </Text>
 
+                  {items.map((item) => (
+                    <View key={item.id} style={styles.card}>
+                      <View style={styles.cardLeft}>
+                        <Text style={styles.cardTitle}>{item.name}</Text>
+                        <Text style={styles.cardCategory}>
+                          {item.category?.icon} {item.category?.name}
+                        </Text>
+                      </View>
+
+                      <View style={styles.cardRight}>
+                        <Text
+                          style={[
+                            item.type === "Income"
+                              ? styles.incomeValue
+                              : styles.expenseValue,
+                          ]}
+                        >
+                          ${item.amount}
+                        </Text>
+
+                        <TouchableOpacity
+                          onPress={() => navigation.navigate("ManualEntry", { item })}
+                        >
+                          <Icon name="pencil" size={20} style={styles.editIcon} />
+                        </TouchableOpacity>
+                        <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                          <Icon name="trash" size={20} color="red" style={styles.deleteIcon} />
+                        </TouchableOpacity>
+
+                      </View>
+                    </View>
+                  ))}
+                </View>
+              );
+            })}
           </View>
-        </View>
-      ))}
-    </View>
-  );
-  })}
-</View>
-)}
+        )}
 
 
       </ScrollView>
@@ -277,38 +277,38 @@ const styles = StyleSheet.create({
   incomeValue: { color: "green", fontSize: 22, fontWeight: "600" },
   balanceValue: { color: "black", fontSize: 22, fontWeight: "600" },
 
- groupContainer: {
-  backgroundColor: "#D4EFF3",
-  paddingVertical: 15,
-  paddingHorizontal: 15,
-  borderRadius: 20,
-  marginBottom: 20,
-  overflow: "hidden",
-},
+  groupContainer: {
+    backgroundColor: "#D4EFF3",
+    paddingVertical: 15,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    marginBottom: 20,
+    overflow: "hidden",
+  },
 
-groupHeader: {
-  fontSize: 18,
-  fontWeight: "700",
-  marginBottom: 10,  // reduced from 15
-},
+  groupHeader: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 10,  // reduced from 15
+  },
 
-card: {
-  backgroundColor: "white",
-  padding: 14,
-  borderRadius: 15,
-  marginBottom: 10,
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  overflow: "hidden",
-},
+  card: {
+    backgroundColor: "white",
+    padding: 14,
+    borderRadius: 15,
+    marginBottom: 10,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    overflow: "hidden",
+  },
 
 
   cardTitle: { fontSize: 16, fontWeight: "600" },
   cardCategory: { color: "gray", fontSize: 12 },
 
   cardRight: { flexDirection: "row", alignItems: "center" },
-  cardLeft: {flex: 1},
+  cardLeft: { flex: 1 },
   editIcon: { marginLeft: 10 },
   deleteIcon: { marginLeft: 20 },
 
@@ -332,24 +332,24 @@ card: {
     marginTop: -4,
   },
   monthContainer: {
-  backgroundColor: "#D4EFF3",
-  paddingVertical: 20,
-  paddingHorizontal: 15,
-  borderRadius: 20,
-  marginBottom: 30,
-},
+    backgroundColor: "#D4EFF3",
+    paddingVertical: 20,
+    paddingHorizontal: 15,
+    borderRadius: 20,
+    marginBottom: 30,
+  },
 
-emptyContainer: {
-  paddingTop: 40,
-  paddingBottom: 120,
-  alignItems: "center",
-},
+  emptyContainer: {
+    paddingTop: 40,
+    paddingBottom: 120,
+    alignItems: "center",
+  },
 
-emptyText: {
-  fontSize: 16,
-  color: "#777",
-  fontStyle: "italic",
-},
+  emptyText: {
+    fontSize: 16,
+    color: "#777",
+    fontStyle: "italic",
+  },
 
 
 });

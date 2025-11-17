@@ -7,7 +7,7 @@ import CreateAccountPage from '../screens/CreateAccountPage';
 import ForgotPasswordPage from '../screens/ForgotPasswordPage';
 import BottomTabs from './BottomTabs';
 import ManualEntryPage from '../screens/ManualEntryPage';
-import { Transaction } from '../context/TransactionsContext';
+import { Transaction } from '../utils/TransactionsContext';
 import LogScreen from '../screens/LogScreen';
 // import ChatBotScreen from '../screens/ChatBotScreen';
 // import CameraScreen from '../screens/CameraScreen';
@@ -16,21 +16,21 @@ import CategoryEditor from '../screens/CategoryEditor';
 import { checkLogin } from '../utils/auth';
 
 export type AuthStackParamList = {
-   Login: undefined; 
-   CreateAccount: undefined; 
-   ForgotPassword: undefined; 
-   HomeTabs: {
+  Login: undefined;
+  CreateAccount: undefined;
+  ForgotPassword: undefined;
+  HomeTabs: {
     screen: keyof import("../navigation/BottomTabs").BottomTabParamList;
     params?: object;
   } | undefined;
-   ChatBot: undefined;
-   CameraScreen: undefined;
-   CategoryEditor: { type: 'income' | 'expense' };
+  ChatBot: undefined;
+  CameraScreen: undefined;
+  CategoryEditor: { type: 'income' | 'expense' };
   LogScreen: { recentDate?: string; justAddedId?: string } | undefined;
   ManualEntry: { item: Transaction | null } | undefined;
- };
+};
 
-const Stack = createNativeStackNavigator<AuthStackParamList>(); 
+const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export default function AppStack() {
   // const [loading, setLoading] = useState(true);
@@ -54,7 +54,7 @@ export default function AppStack() {
   // if (loading) return <LoadingSpinner/>;
 
   return (
-    <Stack.Navigator initialRouteName = "HomeTabs" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="HomeTabs" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginPage} />
       <Stack.Screen name="CreateAccount" component={CreateAccountPage} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordPage} />
@@ -92,7 +92,7 @@ export default function AppStack() {
           headerTitleAlign: 'center',
           headerStyle: { backgroundColor: '#E7E7E7' },
           headerTintColor: '#000',
-          headerBackTitleVisible: false, 
+          headerBackTitleVisible: false,
           headerBackButtonDisplayMode: 'minimal',
         })}
       />
