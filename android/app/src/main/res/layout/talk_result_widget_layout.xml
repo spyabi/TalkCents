@@ -1,0 +1,72 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/talk_result_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#bae7ec">
+
+    <!-- Title -->
+    <TextView
+        android:id="@+id/title"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="TalkCents"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        android:textSize="22sp"
+        android:layout_gravity="top|center_horizontal"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Data from API call -->
+    <LinearLayout
+        android:id="@+id/result_container"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:layout_gravity="center">
+
+        <TextView
+            android:id="@+id/result_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Expense Recorded"
+            android:textColor="#000000"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:gravity="center"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/result_detail"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mac's Lunch $10"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:gravity="center"
+            android:layout_marginBottom="8dp"/>
+
+        <TextView
+            android:id="@+id/result_status_pending"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Pending"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:gravity="center"/>
+    </LinearLayout>
+
+    <!-- Cancel Button -->
+    <ImageButton
+        android:id="@+id/icon_cancel_button"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
+        android:src="@drawable/icon_cancel"
+        android:background="@android:color/transparent"
+        android:contentDescription="Cancel Button"
+        android:scaleType="fitCenter"
+        android:adjustViewBounds="true"
+        android:padding="0dp"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="16dp"/>
+</FrameLayout>
