@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 const API_URL = "http://18.234.224.108:8000/api"
 export type Category = {
   name: string;
@@ -28,13 +28,41 @@ type TransactionsContextType = {
 
 const TransactionsContext = createContext<TransactionsContextType | null>(null);
 
+// export const TransactionsProvider = ({ children }: { children: React.ReactNode }) => {
+//   const [categories, setCategories] = useState<Category[]>([
+//     { name: "Food & Drinks", icon: '🍔' },
+//     { name: "Shopping", icon: "🛍️" },
+//     { name: "Transport", icon: "🚃" },
+//     { name: "Others", icon: "🗂️" },
+//   ]);
 export const TransactionsProvider = ({ children }: { children: React.ReactNode }) => {
-  const [categories, setCategories] = useState<Category[]>([
-    { name: "Food & Drinks", icon: '🍔' },
-    { name: "Shopping", icon: "🛍️" },
-    { name: "Transport", icon: "🚃" },
-    { name: "Others", icon: "🗂️" },
-  ]);
+  const [categories, setCategories] = useState<Category[]>([ ... ]);
+
+  // --- NEW: helper to fetch icon by category name (fallback = empty) ---
+  const pickIcon = (name: string) =>
+    categories.find(c => c.name.toLowerCase() === String(name).toLowerCase())?.icon ?? "";
+
+  // 🔧 make it stable across renders
+  const toClientTx = useCallback((raw: any): Transaction => {
+    const id = String(raw.id ?? raw._id ?? Date.now());
+    const type: "Income" | "Expense" = raw.type === "Income" ? "Income" : "Expense";
+    const name = String(raw.name ?? "");
+    const amount = Number(raw.amount ?? raw.price ?? 0);
+    const catName = typeof raw.category === "string" ? raw.category : raw.category?.name ?? "Others";
+    const date = (() => {
+      const d = raw.date ? new Date(raw.date) : new Date();
+      return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
+    })();
+    return {
+      id,
+      type,
+      name,
+      amount,
+      date,
+      category: { name: catName, icon: pickIcon(catName) },
+      note: raw.note ?? "",
+    };
+  }, [categories]); 
 
   // Add a new category
   const addCategory = async (name: string, icon?: string) => {
@@ -54,10 +82,18 @@ export const TransactionsProvider = ({ children }: { children: React.ReactNode }
         const pending = await pendingRes.json();
         const approved = await approvedRes.json();
 
-        setTransactions([...pending, ...approved]);
+         // --- NEW: map backend -> client shape uniformly ---
+        const mapped = [...(pending ?? []), ...(approved ?? [])].map(toClientTx);
+        setTransactions(mapped);
       } catch (error) {
         console.log("Failed to load transactions:", error);
+        setTransactions([]); // keep app stable
       }
+
+      //   setTransactions([...pending, ...approved]);
+      // } catch (error) {
+      //   console.log("Failed to load transactions:", error);
+      // }
     };
 
     loadTransactions();
@@ -80,9 +116,13 @@ export const TransactionsProvider = ({ children }: { children: React.ReactNode }
         note: tx.note || ""
       })
     });
+    const savedRaw = await response.json();
+    // --- NEW: normalize saved payload before adding to state ---
+    const saved = toClientTx(savedRaw);
+    setTransactions((prev) => [...prev, saved]);
 
-    const saved = await response.json();
-    setTransactions(prev => [...prev, saved]);
+    // const saved = await response.json();
+    // setTransactions(prev => [...prev, saved]);
   };
 
 
@@ -91,14 +131,31 @@ export const TransactionsProvider = ({ children }: { children: React.ReactNode }
   //   setTransactions(prev =>
   //     prev.map(tx => (tx.id === updated.id ? updated : tx))
   //   );
+  // const editTransaction = async (tx: Transaction) => {
+  //   const res = await fetch(`${API_URL}/expenditure/${tx.id}`, {
+  //     method: "PATCH",
+  //     headers: { "Content-Type": "application/json" },
+  //     body: JSON.stringify(tx)
+  //   });
+
   const editTransaction = async (tx: Transaction) => {
     const res = await fetch(`${API_URL}/expenditure/${tx.id}`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(tx)
+      body: JSON.stringify({
+        name: tx.name,
+        amount: tx.amount,
+        type: tx.type,
+        category: tx.category.name,
+        date: tx.date,
+        note: tx.note ?? "",
+      }),
     });
 
-    const updated = await res.json();
+    // const updated = await res.json();
+    const updatedRaw = await res.json();
+    // --- NEW: normalize updated payload before replacing in state ---
+    const updated = toClientTx(updatedRaw);
 
     setTransactions(prev =>
       prev.map(t => t.id === updated.id ? updated : t)
