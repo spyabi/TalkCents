@@ -57,7 +57,7 @@ const FloatingButton = () => {
   return(
     <View style={styles.container}>
       <Animated.View style={[styles.circle, { bottom: icon_2_1, right: icon_2_2}]}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('ChatBot')}>
           <Icon name="logo-android" size={30} color="#FFFF" />
         </TouchableOpacity>
       </Animated.View>

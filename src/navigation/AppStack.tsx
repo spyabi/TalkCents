@@ -8,8 +8,8 @@ import BottomTabs from './BottomTabs';
 import ManualEntryPage from '../screens/ManualEntryPage';
 import { Transaction } from '../utils/TransactionsContext';
 import LogScreen from '../screens/LogScreen';
-// import ChatBotScreen from '../screens/ChatBotScreen';
-// import CameraScreen from '../screens/CameraScreen';
+import ChatBotScreen from '../screens/ChatBotScreen';
+import CameraScreen from '../screens/CameraScreen';
 import CategoryEditor from '../screens/CategoryEditor';
 import LoadingSpinner from '../components/LoadingSpinner'
 import { checkLogin } from '../utils/auth';
@@ -60,7 +60,7 @@ export default function AppStack() {
       <Stack.Screen name="HomeTabs" component={BottomTabs} />
       <Stack.Screen name="ManualEntry" component={ManualEntryPage} />
       {/* <Stack.Screen name= "LogScreen" component={LogScreen} /> */}
-      {/* <Stack.Screen
+      <Stack.Screen
         name="ChatBot"                               
         component={ChatBotScreen}
         options={{
@@ -81,7 +81,7 @@ export default function AppStack() {
           headerStyle: { backgroundColor: '#E7E7E7' },
           headerTintColor: '#000',
         }}
-      /> */}
+      />
       <Stack.Screen
         name="CategoryEditor"
         component={CategoryEditor}
