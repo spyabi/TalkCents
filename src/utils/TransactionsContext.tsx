@@ -74,7 +74,7 @@ export const TransactionsProvider = ({
       date,
       category: catName,
       note: raw.notes ?? raw.note ?? '',
-      status: raw.status ?? 'Approved',
+      status: raw.status ?? 'Pending',
     };
   }, []);
 
@@ -159,12 +159,11 @@ export const TransactionsProvider = ({
         category: tx.category,
         date_of_expense: tx.date,
         notes: tx.note ?? '',
-        status: 'Approved',
+        status: tx.status,
       }),
     });
 
     const updatedRaw = await res.json();
-    console.log(`HERE: ${JSON.stringify(updatedRaw)}`);
     const updated = toClientTx(updatedRaw);
 
     setTransactions(prev => prev.map(t => (t.id === updated.id ? updated : t)));

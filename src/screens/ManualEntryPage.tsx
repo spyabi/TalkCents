@@ -42,6 +42,7 @@ export default function ManualEntryPage({ navigation, route }: Props) {
 
   const itemToEdit = route.params?.item ?? null;
   const isEditing = !!itemToEdit;
+
   useEffect(() => {
     if (itemToEdit) {
       setType(itemToEdit.type);
@@ -289,7 +290,7 @@ export default function ManualEntryPage({ navigation, route }: Props) {
               // Handle category object requirement if necessary
               category: category ? category : "",
               note,
-              status: "Approved"
+              status: itemToEdit?.status ?? "Pending"
             };
 
             if (isEditing) {

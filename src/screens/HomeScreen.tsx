@@ -13,42 +13,75 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getPending, getApproved, Expenditure } from '../utils/expenditure';
 import Svg, { Path } from 'react-native-svg';
 
-type PendingItem = { id: string; label: string };
-type LegendItem = { label: string; amount: number; percent: number; color: string };
+type PendingItem = { id: string; name: string };
+type LegendItem = {
+  label: string;
+  amount: number;
+  percent: number;
+  color: string;
+};
 
 type RootStackParamList = {
   HomeTabs: undefined;
+  ManualEntry: { item: any | null };
   Login: undefined;
   Log: undefined;
 };
 
 /* ---------- stable helpers OUTSIDE the component ---------- */
-const COLORS = ['#7aa8ab', '#bfe7ee', '#d8f3f7', '#a3c7d3', '#6e9fa8', '#cfe8ee'];
+const COLORS = [
+  '#7aa8ab',
+  '#bfe7ee',
+  '#d8f3f7',
+  '#a3c7d3',
+  '#6e9fa8',
+  '#cfe8ee',
+];
 const rad = (deg: number) => (deg * Math.PI) / 180;
-function arcPath(cx: number, cy: number, r: number, startDeg: number, endDeg: number) {
-  const start = { x: cx + r * Math.cos(rad(startDeg)), y: cy + r * Math.sin(rad(startDeg)) };
-  const end   = { x: cx + r * Math.cos(rad(endDeg)),   y: cy + r * Math.sin(rad(endDeg)) };
+function arcPath(
+  cx: number,
+  cy: number,
+  r: number,
+  startDeg: number,
+  endDeg: number,
+) {
+  const start = {
+    x: cx + r * Math.cos(rad(startDeg)),
+    y: cy + r * Math.sin(rad(startDeg)),
+  };
+  const end = {
+    x: cx + r * Math.cos(rad(endDeg)),
+    y: cy + r * Math.sin(rad(endDeg)),
+  };
   const largeArc = endDeg - startDeg > 180 ? 1 : 0;
   return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
 }
 /* --------------------------------------------------------- */
 
 export default function HomeScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [items, setItems] = useState<PendingItem[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [legendData, setLegendData] = useState<LegendItem[]>([]);
   const [totalSpent, setTotalSpent] = useState(0);
 
-  const goToLog = () => navigation.navigate('Log');
+  const goToLog = (item: any) => navigation.navigate('ManualEntry', { item });
+  const handleApprove = (id: any) => {
+    console.log(`HERE WORKING ${id}`);
+  };
 
   // /expenditure/pending -> pending list
   const loadItems = useCallback(async () => {
     try {
       const pending = await getPending();
-      const mapped: PendingItem[] = (pending ?? []).map((e) => ({
-        id: String(e.id),
-        label: e.name,
+      const mapped: PendingItem[] = (pending ?? []).map(e => ({
+        id: String(e.uuid),
+        name: String(e.name),
+        date: String(e.date_of_expense),
+        amount: Number(e.amount),
+        category: String(e.category),
+        note: String(e.notes)
       }));
       setItems(mapped);
     } catch (e) {
@@ -63,7 +96,7 @@ export default function HomeScreen() {
       const approved: Expenditure[] = await getApproved();
       const byCat = approved.reduce<Record<string, number>>((acc, e) => {
         const k = e.category || 'Uncategorized';
-        acc[k] = (acc[k] || 0) + (Number(e.price) || 0);
+        acc[k] = (acc[k] || 0) + (Number(e.amount) || 0);
         return acc;
       }, {});
       const total = Object.values(byCat).reduce((s, v) => s + v, 0);
@@ -87,7 +120,8 @@ export default function HomeScreen() {
   // memoize SVG slices to keep render stable
   const pieSlices = useMemo(() => {
     const r = 85;
-    const cx = 85, cy = 85;
+    const cx = 85,
+      cy = 85;
     let angle = -90;
     return legendData.map((seg, idx) => {
       const sweep = (seg.percent / 100) * 360;
@@ -137,7 +171,6 @@ export default function HomeScreen() {
           </Text>
         </View>
 
-
         {/* Total from backend */}
         <View style={{ alignItems: 'center', marginTop: 6 }}>
           <Text style={styles.totalTitle}>total expenditure</Text>
@@ -146,7 +179,7 @@ export default function HomeScreen() {
 
         {/* Legend */}
         <View style={styles.legend}>
-          {legendData.map((it) => (
+          {legendData.map(it => (
             <View key={it.label} style={styles.legendItem}>
               <View style={[styles.dot, { backgroundColor: it.color }]} />
               <Text style={styles.legendText}>
@@ -164,12 +197,12 @@ export default function HomeScreen() {
           <Text style={styles.pendingTitle}>Pending</Text>
           <FlatList
             data={items}
-            keyExtractor={(i) => i.id}
+            keyExtractor={i => i.id}
             renderItem={({ item }) => (
               <PendingRow
-                label={item.label}
-                onEdit={goToLog}
-                onConfirm={goToLog}
+                label={item.name}
+                onEdit={() => goToLog(item)}
+                onConfirm={handleApprove(item.id)}
               />
             )}
             ListEmptyComponent={
@@ -194,7 +227,7 @@ function PendingRow({
 }: {
   label: string;
   onEdit: () => void;
-  onConfirm: () => void;
+  onConfirm: any;
 }) {
   return (
     <View style={styles.pendingRow}>
@@ -237,21 +270,39 @@ const styles = StyleSheet.create({
   pieLabel: { marginTop: 6, color: c.muted, fontSize: 12 },
   totalTitle: { fontSize: 14, fontWeight: '700', color: c.text, marginTop: 8 },
   totalValue: { fontSize: 22, fontWeight: '800' },
-  legend: { flexDirection: 'column', marginTop: 10, gap: 8, paddingHorizontal: 8 },
+  legend: {
+    flexDirection: 'column',
+    marginTop: 10,
+    gap: 8,
+    paddingHorizontal: 8,
+  },
   legendItem: { flexDirection: 'row', alignItems: 'center' },
   dot: { width: 14, height: 14, borderRadius: 7, marginRight: 10 },
   legendText: { color: c.muted },
-  pendingCard: { marginTop: 16, padding: 14, backgroundColor: c.card, borderRadius: 18 },
+  pendingCard: {
+    marginTop: 16,
+    padding: 14,
+    backgroundColor: c.card,
+    borderRadius: 18,
+  },
   pendingTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10 },
   pendingRow: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: c.tint, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: c.tint,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
   },
   pendingLabel: { flex: 1, color: c.text },
   pendingActions: { flexDirection: 'row', gap: 12 },
   iconBtn: {
-    width: 28, height: 28, borderRadius: 6, backgroundColor: '#000',
-    alignItems: 'center', justifyContent: 'center',
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   iconText: { color: '#fff', fontSize: 14, fontWeight: '700' },
 });
