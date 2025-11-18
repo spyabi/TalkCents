@@ -36,7 +36,9 @@ const TransactionsContext = createContext<TransactionsContextType | null>(null);
 //     { name: "Others", icon: "🗂️" },
 //   ]);
 export const TransactionsProvider = ({ children }: { children: React.ReactNode }) => {
-  const [categories, setCategories] = useState<Category[]>([ ... ]);
+//   const [categories, setCategories] = useState<Category[]>([ ... ]);
+    const [categories, setCategories] = useState<Category[]>([]);
+//syntax error
 
   // --- NEW: helper to fetch icon by category name (fallback = empty) ---
   const pickIcon = (name: string) =>

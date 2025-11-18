@@ -1,5 +1,4 @@
-// import React, { useState, useEffect } from 'react';
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
 import LoginPage from '../screens/LoginPage';
@@ -12,7 +11,7 @@ import LogScreen from '../screens/LogScreen';
 // import ChatBotScreen from '../screens/ChatBotScreen';
 // import CameraScreen from '../screens/CameraScreen';
 import CategoryEditor from '../screens/CategoryEditor';
-// import LoadingSpinner from '../components/LoadingSpinner'
+import LoadingSpinner from '../components/LoadingSpinner'
 import { checkLogin } from '../utils/auth';
 
 export type AuthStackParamList = {
@@ -33,8 +32,8 @@ export type AuthStackParamList = {
 const Stack = createNativeStackNavigator<AuthStackParamList>();
 
 export default function AppStack() {
-  // const [loading, setLoading] = useState(true);
-  // const [initialRoute, setInitialRoute] = useState<'Login' | 'HomeTabs'>('Login');
+  const [loading, setLoading] = useState(true);
+  const [initialRoute, setInitialRoute] = useState<'Login' | 'HomeTabs'>('Login');
   // const [ setInitialRoute] = useState<'Login' | 'HomeTabs'>('Login');
   Icon.loadFont();
 
@@ -44,17 +43,17 @@ export default function AppStack() {
       console.log('permissions', "IM CHECkING LOGIN")
       const token = await checkLogin();
       console.log('permissions', 'my token here', token)
-      // setInitialRoute(token ? 'HomeTabs' : 'Login');
+      setInitialRoute(token ? 'HomeTabs' : 'Login');
       // setInitialRoute('HomeTabs');
-      // setLoading(false);
+      setLoading(false);
     };
     verify();
   }, []);
 
-  // if (loading) return <LoadingSpinner/>;
+  if (loading) return <LoadingSpinner/>;
 
   return (
-    <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginPage} />
       <Stack.Screen name="CreateAccount" component={CreateAccountPage} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordPage} />
