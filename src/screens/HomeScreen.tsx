@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
-import { getPending, getApproved, Expenditure, approveOne } from "../utils/expenditure";
+import { getPending, getApproved, getExpenditures, approveOne } from "../utils/expenditure";
 import Svg, { Path } from "react-native-svg";
 import { useTransactions, Transaction } from "../utils/TransactionsContext";
 
@@ -102,22 +102,86 @@ export default function HomeScreen() {
 }, [pickIcon]);
 
   // totals / pie
-  const loadSpending = useCallback(async () => {
+//   const loadSpending = useCallback(async () => {
+//   try {
+//     // Fetch both approved and pending expenditures
+//     const [approved, pending]: [Expenditure[], Expenditure[]] = await Promise.all([
+//       getApproved(),
+//       getPending(),
+//     ]);
+
+//     console.log("Approved expenditures:", approved);  // Log the response
+//     console.log("Pending expenditures:", pending);  // Log the response
+
+//     // Combine approved and pending expenditures
+//     const allExpenditures = [...approved, ...pending];
+
+//     const byCat = allExpenditures.reduce<Record<string, number>>((acc, e) => {
+//       const k = e.category || "Uncategorized";
+//       // Ensure the amount is being correctly parsed as a number
+//       const amount = Number(e.amount);
+//       console.log(`Processing expenditure for ${e.category}: ${amount}`);  // Debugging log
+
+//       if (isNaN(amount)) {
+//         console.warn(`Invalid amount detected for ${e.name}: ${e.amount}`);
+//       }
+
+//       acc[k] = (acc[k] || 0) + amount;  // Add to the existing category
+//       return acc;
+//     }, {});
+
+//     console.log("Spending by category:", byCat);  // Verify this data
+
+//     const total = Object.values(byCat).reduce((s, v) => s + v, 0);
+//     setTotalSpent(total);
+
+//     if (total <= 0) {
+//       setLegendData([]);
+//       return;
+//     }
+
+//     const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+//     const legend: LegendItem[] = entries.map(([label, amount], i) => ({
+//       label,
+//       amount,
+//       percent: total > 0 ? (amount / total) * 100 : 0,
+//       color: COLORS[i % COLORS.length],
+//     }));
+//     setLegendData(legend);
+
+//   } catch (e) {
+//     console.warn("Failed to load expenditures:", e);
+//     setLegendData([]);
+//     setTotalSpent(0);
+//   }
+// }, []);
+
+const loadSpending = useCallback(async () => {
   try {
-    const approved: Expenditure[] = await getApproved();
-    console.log("Approved expenditures:", approved);  // Log the response
+    // Fetch all expenditures and approved ones separately
+    const [allExpenditures, approvedExpenditures] = await Promise.all([
+      getExpenditures(), // Get all expenditures (approved and pending)
+      getApproved()      // Get only approved expenditures
+    ]);
 
-    const byCat = approved.reduce<Record<string, number>>((acc, e) => {
-      const k = e.category || "Uncategorized";
-      // Ensure the amount is being correctly parsed as a number
-      const amount = Number(e.amount);
-      console.log(`Processing expenditure for ${e.category}: ${amount}`);  // Debugging log
+    console.log("All expenditures:", allExpenditures);  // Log all expenditures
+    console.log("Approved expenditures:", approvedExpenditures);  // Log approved expenditures
 
-      if (isNaN(amount)) {
-        console.warn(`Invalid amount detected for ${e.name}: ${e.amount}`);
+    // Process all expenditures but exclude pending ones for the total calculation
+    const byCat = allExpenditures.reduce<Record<string, number>>((acc, e) => {
+      // Skip pending expenditures in the total calculation
+      if (e.status !== 'PENDING') {
+        const k = e.category || "Uncategorized";
+        const amount = Number(e.amount);  // Ensure amount is parsed as a number
+
+        console.log(`Processing expenditure for ${e.category}: ${amount}`);  // Debugging log
+
+        if (isNaN(amount)) {
+          console.warn(`Invalid amount detected for ${e.name}: ${e.amount}`);
+        }
+
+        acc[k] = (acc[k] || 0) + amount;  // Add to the existing category
       }
-
-      acc[k] = (acc[k] || 0) + amount;  // Add to the existing category
       return acc;
     }, {});
 
@@ -141,11 +205,12 @@ export default function HomeScreen() {
     setLegendData(legend);
 
   } catch (e) {
-    console.warn("Failed to load approved expenditures:", e);
+    console.warn("Failed to load expenditures:", e);
     setLegendData([]);
     setTotalSpent(0);
   }
 }, []);
+
 
   // // go to Log screen (tab)
   // const goToLog = useCallback(() => {
