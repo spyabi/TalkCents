@@ -13,6 +13,7 @@ import {
   ScrollView,
   TouchableOpacity,
   PermissionsAndroid,
+  Alert
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
@@ -25,23 +26,35 @@ import Sound, {
   PlayBackType,
 } from 'react-native-nitro-sound';
 //https://reactnative.dev/docs/keyboardavoidingview
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 // import type { ChatHistory } from '../utils/chatbotAPI.ts';
-import { sendChatMessage, transcribeAudio } from '../utils/chatbotAPI.ts';
+import { sendChatMessage, transcribeAudio, createApprovedExpense } from '../utils/chatbotAPI.ts';
 
 type MessageContent =
   | { type: 'text'; text: string }
   | { type: 'image_url'; image_url: { url: string } }
-  | { type: 'audio'; audioUri: string };
+  | { type: 'audio'; audioUri: string }
+  | { type: 'expense'; text: string };
+
 
 export type Message = {
   role: 'user' | 'assistant';
   content: MessageContent[]
 };
 
+export type Expense = {
+  name: string;
+  date_of_expense: string;
+  amount: number;
+  category: string;
+  notes?: string;
+  status: 'Pending' | 'Approved';
+};
+
 export default function ChatBotScreen() {
   const navigation = useNavigation();
   const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
+//   const [messages, setMessages] = useState<Message[]>([]);
   const [inputHeight, setInputHeight] = useState(40);
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -52,6 +65,27 @@ export default function ChatBotScreen() {
   const [isPlaying, setIsPlaying] = useState(false);
 
   const [chatHistory, setchatHistory] = useState<Message[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
+  // Initial message
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      role: 'assistant',
+      content: [
+        {
+          type: 'text',
+          text: `Hello! 👋 I can help you log your expenses. For example:
+Burger $5 yesterday, Coffee $2 today
+
+You can also:
+  - Take a picture of your receipt with/without a caption 📸
+  - Tell me your expenses using your voice 🎤
+  - Correct me if I got something wrong (e.g., "No, it was $5, not $10") ✏️
+
+I’ll parse everything and ask for your approval before saving!`
+        }
+      ],
+    },
+  ]);
 
 
   const getAndroidPermission = async () => {
@@ -123,13 +157,32 @@ export default function ChatBotScreen() {
         setchatHistory(prev => [...prev, newBotMessage]);
       }
       if (botResponse?.expense?.length) {
+        // Map API response to Expense type
+        const newExpenses: Expense[] = botResponse.expense.map(exp => ({
+          name: exp.name,
+          date_of_expense: exp.date_of_expense,
+          amount: exp.price,
+          category: exp.category,
+          notes: exp.notes || '',
+          status: 'Approved',
+        }));
+        // Replace the existing array
+        setExpenses(newExpenses);
+        console.log('permissions', "MY EXPENSES ARE", newExpenses)
         const expenseText = botResponse.expense
-          .map(exp => `${exp.name} - ${exp.category}: $${exp.price.toString()}`)
-          .join('\n'); // join each expense with a new line
+          .map((exp, index) => {
+            // Use Markdown for formatting: ** for bold.
+            const expenseHeader = `**Expense ${index + 1}**\n`;
+            const nameAndPrice = `${exp.name} --- $${exp.price.toString()}\n`;
+            const category = `${exp.category}\n`;
+            const date = `${exp.date_of_expense}`
+            return `${expenseHeader}${nameAndPrice}${category}${date}`;
+          })
+          .join('\n----------------\n\n');
         const newBotExpense: Message = {
           role: 'assistant',
           content: [{
-            type: 'text',
+            type: 'expense',
             text: expenseText
           }]
         };
@@ -327,21 +380,52 @@ export default function ChatBotScreen() {
     console.log('permissions', 'Image stored in setMessages');
   };
 
+  const lastExpenseIndex = messages
+    .map((msg, idx) => ({ msg, idx }))
+    .filter(({ msg }) => msg.content[0].type === 'expense')
+    .map(({ idx }) => idx)
+    .pop(); // gets the last one or undefined if none
+
+  const sendExpenses = async () => {
+    try {
+      const response = await createApprovedExpense(expenses);
+      Alert.alert('Success', 'Expenses approved successfully!');
+      return response;
+    } catch (error: any) {
+      console.error('Error approving expenses:', error);
+      Alert.alert(
+        'Error',
+        error?.message || 'Failed to approve expenses. Please try again.',
+        [{ text: 'OK' }],
+        { cancelable: true }
+      );
+    }
+  };
+
   return (
     <KeyboardAvoidingView
       behavior={Platform.OS === 'ios' ? 'padding' : 'padding'}
       style={styles.container}>
-      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+      {/*<TouchableWithoutFeedback onPress={Keyboard.dismiss}>*/}
         <View style={styles.inner}>
           {/* Chat messages */}
-          <ScrollView
+          {/* <ScrollView
             style={styles.chatContainer}
             // flex end makes the msgs move to the bottom
             contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', padding: 0}}
             ref={scrollViewRef}
             onContentSizeChange={() =>
               scrollViewRef.current?.scrollToEnd({ animated: true })
-            }>
+            }>*/}
+          <KeyboardAwareScrollView
+            style={styles.chatContainer}
+            // flex end makes the msgs move to the bottom
+            contentContainerStyle={{ flexGrow: 1, justifyContent: 'flex-end', paddingBottom: 20 }}
+            ref={scrollViewRef}
+            onContentSizeChange={() => scrollViewRef.current?.scrollToEnd({ animated: true })}
+            keyboardShouldPersistTaps="handled"
+            // technically this does the TouchableWithoutFeedback, need to test with/without
+          >
             {messages.map((msg, idx) => (
               <View
                 key={idx}
@@ -361,7 +445,25 @@ export default function ChatBotScreen() {
                         color="#007AFF"
                       />
                   </TouchableOpacity>
-                ) : msg.content[0].type === 'image_url' ? (
+                ) : msg.content[0].type === 'expense' ? (
+                <>
+                  <Text style={styles.messageText}>{msg.content[0].text}</Text>
+                  {/*if last expense*/}
+                  {idx === lastExpenseIndex && (
+                    <TouchableOpacity
+                      style={styles.approveall}
+                      onPress={async () => {
+                        console.log('permissions', "Expense approved")
+                        await sendExpenses();
+                        navigation.goBack();
+                      }}>
+                      <Text style={{ color: '000', textAlign: 'center', fontWeight: '700' }}>
+                          Approve All
+                      </Text>
+                    </TouchableOpacity>
+                    )}
+                </>
+                ): msg.content[0].type === 'image_url' ? (
                   <>
                     <TouchableOpacity
                       onPress={() => {
@@ -388,7 +490,8 @@ export default function ChatBotScreen() {
                 ) : null }
               </View>
             ))}
-          </ScrollView>
+          {/*</ScrollView>*/}
+          </KeyboardAwareScrollView>
           {/* Input area */}
           <View style={styles.inputRow}>
             {/*Text input / recording*/}
@@ -435,7 +538,7 @@ export default function ChatBotScreen() {
             )}
           </View>
         </View>
-      </TouchableWithoutFeedback>
+      {/*</TouchableWithoutFeedback>*/}
     </KeyboardAvoidingView>
   );
 };
@@ -502,4 +605,11 @@ const styles = StyleSheet.create({
   iconButton: {
     padding: 8,
   },
+  approveall: {
+    marginTop: 8,
+    backgroundColor: '#BAE7EC',
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+  }
 });

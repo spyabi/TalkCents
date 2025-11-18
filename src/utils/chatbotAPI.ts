@@ -1,5 +1,5 @@
 import { getToken } from './auth'; // token
-import type { Message } from '../screens/ChatBotScree.tsx';
+import type { Message, Expense } from '../screens/ChatBotScreen.tsx';
 
 // export type ChatMessageContent =
 //   | { type: 'text'; text: string }
@@ -11,6 +11,7 @@ import type { Message } from '../screens/ChatBotScree.tsx';
 // };
 
 const API_URL = 'http://18.234.224.108:8000/api/llm';
+const API_EXPENDITURE_URL = 'http://18.234.224.108:8000/api/expenditure'
 
 export async function sendChatMessage(messages: Message[]) {
 //   future check for token
@@ -66,12 +67,35 @@ export async function transcribeAudio(audioUri: string) {
   return await response.json(); // should return transcription text from backend
 }
 
-const getMimeType = (uri: string) => {
-  const ext = uri.split('.').pop();
-  switch(ext) {
-    case 'm4a': return 'audio/m4a';
-    case 'mp3': return 'audio/mpeg';
-    case 'wav': return 'audio/wav';
-    default: return 'application/octet-stream';
+export async function createApprovedExpense(expenses: Expense[]) {
+//   future check for token
+  const token = await getToken();
+  if (!token) throw new Error('No token found');
+  console.log('permissions', "EXPENSES IM POSTING ARE", expenses);
+  const response = await fetch(`${API_EXPENDITURE_URL}/bulk`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(expenses),
+  });
+
+  if (!response.ok) {
+    const errText = await response.text();
+    throw new Error(`Chat API error: ${errText}`);
   }
-};
+
+  return await response.json();
+}
+
+// not needed for now
+// const getMimeType = (uri: string) => {
+//   const ext = uri.split('.').pop();
+//   switch(ext) {
+//     case 'm4a': return 'audio/m4a';
+//     case 'mp3': return 'audio/mpeg';
+//     case 'wav': return 'audio/wav';
+//     default: return 'application/octet-stream';
+//   }
+// };

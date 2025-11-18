@@ -1,5 +1,5 @@
 import React, { useState} from "react";
-import { View, TouchableOpacity, StyleSheet, Animated } from "react-native";
+import { View, TouchableOpacity, StyleSheet, Animated, Text } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
 import { useNavigation } from '@react-navigation/native';
@@ -55,12 +55,18 @@ const FloatingButton = () => {
     <View style={styles.container}>
       <Animated.View style={[styles.circle, { bottom: icon_2_1, right: icon_2_2}]}>
         <TouchableOpacity onPress={() => navigation.navigate('ChatBot')}>
-          <Icon name="android" size={30} color="#FFFF" />
+          <View style={{ alignItems: 'center'}}>
+            <Icon name="android" size={30} color="#FFFF" />
+            <Text style={{ color: '#FFFFFF', fontSize: 12, marginBottom:5 }}>AI</Text>
+          </View>
         </TouchableOpacity>
       </Animated.View>
       <Animated.View style={[styles.circle, {right: icon_3}]}>
         <TouchableOpacity>
-          <Icon name="create" size={30} color="#FFFF" />
+          <View style={{ alignItems: 'center'}}>
+            <Icon name="create" size={30} color="#FFFF" />
+            <Text style={{ color: '#FFFFFF', fontSize: 12, marginBottom:5 }}>Manual</Text>
+          </View>
         </TouchableOpacity>
       </Animated.View>
       <TouchableOpacity
