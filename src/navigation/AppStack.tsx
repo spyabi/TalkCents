@@ -54,7 +54,7 @@ export default function AppStack() {
   // if (loading) return <LoadingSpinner/>;
 
   return (
-    <Stack.Navigator initialRouteName="HomeTabs" screenOptions={{ headerShown: false }}>
+    <Stack.Navigator initialRouteName="Login" screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginPage} />
       <Stack.Screen name="CreateAccount" component={CreateAccountPage} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordPage} />
