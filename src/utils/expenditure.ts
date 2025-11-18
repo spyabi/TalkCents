@@ -5,7 +5,7 @@ export type Expenditure = {
   id: string;
   name: string;
   category: string;
-  price: number;
+  amount: number;
   status: 'PENDING' | 'APPROVED';
   // ...add other fields if your backend returns them
 };
@@ -33,7 +33,7 @@ export async function getExpenditures(): Promise<Expenditure[]> {
 
 // POST /expenditure
 export async function createExpenditure(body: {
-  name: string; category: string; price: number;
+  name: string; category: string; amount: number;
 }): Promise<Expenditure> {
   const res = await authFetch('/expenditure', {
     method: 'POST',
@@ -57,7 +57,7 @@ export async function getPending(): Promise<Expenditure[]> {
 // PATCH /expenditure/{id}
 export async function updateExpenditure(
   id: string,
-  body: Partial<Pick<Expenditure, 'name' | 'category' | 'price' | 'status'>>
+  body: Partial<Pick<Expenditure, 'name' | 'category' | 'amount' | 'status'>>
 ): Promise<Expenditure> {
   const res = await authFetch(`/expenditure/${id}`, {
     method: 'PATCH',

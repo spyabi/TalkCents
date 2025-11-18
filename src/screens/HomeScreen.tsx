@@ -68,7 +68,9 @@ export default function HomeScreen() {
   // pending list
   const loadItems = useCallback(async () => {
   try {
+    console.log("Fetching pending transactions...");  // Log the action
     const pending = await getPending();
+    console.log("Fetched pending transactions:", pending);  // Log the response from backend
 
     // Only include pending transactions
     const mapped: Transaction[] = (pending ?? [])
@@ -81,7 +83,7 @@ export default function HomeScreen() {
           id: String(backendId),
           type: "Expense",
           name: e.name,
-          amount: Number(e.price) || 0,
+          amount: Number(e.amount) || 0,
           date: new Date().toISOString(),
           category: {
             name: e.category || "Others",
@@ -108,11 +110,11 @@ export default function HomeScreen() {
     const byCat = approved.reduce<Record<string, number>>((acc, e) => {
       const k = e.category || "Uncategorized";
       // Ensure the amount is being correctly parsed as a number
-      const amount = Number(e.price);
+      const amount = Number(e.amount);
       console.log(`Processing expenditure for ${e.category}: ${amount}`);  // Debugging log
 
       if (isNaN(amount)) {
-        console.warn(`Invalid amount detected for ${e.name}: ${e.price}`);
+        console.warn(`Invalid amount detected for ${e.name}: ${e.amount}`);
       }
 
       acc[k] = (acc[k] || 0) + amount;  // Add to the existing category
