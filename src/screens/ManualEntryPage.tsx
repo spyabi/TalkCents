@@ -46,6 +46,7 @@ export default function ManualEntryPage({ navigation, route }: Props) {
     if (itemToEdit) {
       setType(itemToEdit.type);
       setName(itemToEdit.name);
+      setCategory(itemToEdit.category)
       setAmount(String(itemToEdit.amount));
       setSelectedDate(new Date(itemToEdit.date));
 
