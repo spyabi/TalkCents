@@ -1,7 +1,7 @@
 // import React, { useState, useEffect } from 'react';
 import React, { useEffect } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import Icon from 'react-native-vector-icons/Ionicons';
+// import Icon from 'react-native-vector-icons/Ionicons';
 import LoginPage from '../screens/LoginPage';
 import CreateAccountPage from '../screens/CreateAccountPage';
 import ForgotPasswordPage from '../screens/ForgotPasswordPage';
@@ -36,7 +36,7 @@ export default function AppStack() {
   // const [loading, setLoading] = useState(true);
   // const [initialRoute, setInitialRoute] = useState<'Login' | 'HomeTabs'>('Login');
   // const [ setInitialRoute] = useState<'Login' | 'HomeTabs'>('Login');
-  Icon.loadFont();
+  // Icon.loadFont();
 
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function AppStack() {
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordPage} />
       <Stack.Screen name="HomeTabs" component={BottomTabs} />
       <Stack.Screen name="ManualEntry" component={ManualEntryPage} />
-      {/* <Stack.Screen name= "LogScreen" component={LogScreen} /> */}
+      <Stack.Screen name= "LogScreen" component={LogScreen} />
       {/* <Stack.Screen
         name="ChatBot"                               
         component={ChatBotScreen}

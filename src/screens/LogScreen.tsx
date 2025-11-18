@@ -9,13 +9,9 @@ import FloatingButton from "../components/FloatingButton";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "LogScreen">;
 
-
-
 export default function LogScreen({ navigation }: Props) {
   const today = new Date();
   const { transactions, deleteTransaction } = useTransactions();
-
-
 
   const handleDelete = (id: string) => {
     Alert.alert(
@@ -31,8 +27,6 @@ export default function LogScreen({ navigation }: Props) {
       ]
     );
   };
-
-
 
   //  MONTH LOGIC 
   const [selectedMonth, setSelectedMonth] = useState<number>(today.getMonth());
@@ -79,8 +73,6 @@ export default function LogScreen({ navigation }: Props) {
     }
   }, [route.params?.recentDate]);
 
-
-
   //  FILTER LOGIC 
   const filtered = transactions.filter((t) => {
     const d = new Date(t.date);
@@ -108,16 +100,13 @@ export default function LogScreen({ navigation }: Props) {
     return acc;
   }, {});
 
-
   const sortedDates = Object.keys(grouped).sort(
     (a, b) => new Date(b).getTime() - new Date(a).getTime()
   );
 
-
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-
         {/* TITLE */}
         <View style={styles.titleRow}>
           <Text style={styles.titleText}>Log</Text>
@@ -168,8 +157,7 @@ export default function LogScreen({ navigation }: Props) {
               const d = new Date(date);
 
               return (
-                <View key={date} style={styles.groupContainer}>
-
+                <View key={`${date}-${items[0].id}`} style={styles.groupContainer}>
                   <Text style={styles.groupHeader}>
                     {d.toLocaleDateString("en-US", {
                       weekday: "long",
@@ -178,54 +166,44 @@ export default function LogScreen({ navigation }: Props) {
                     })}
                   </Text>
 
-                  {items.map((item) => (
-                    <View key={item.id} style={styles.card}>
-                      <View style={styles.cardLeft}>
-                        <Text style={styles.cardTitle}>{item.name}</Text>
-                        <Text style={styles.cardCategory}>
-                          {item.category?.icon} {item.category?.name}
-                        </Text>
+                  {items.map((item) => {
+                    const transactionName = item.status === "APPROVED" ? item.name.replace(" Approved", "") : item.name;
+                    return (
+                      <View key={`${item.id}-${transactionName}`} style={styles.card}>
+                        <View style={styles.cardLeft}>
+                          <Text style={styles.cardTitle}>{transactionName}</Text>
+                          <Text style={styles.cardCategory}>
+                            {item.category?.icon} {item.category?.name}
+                          </Text>
+                        </View>
+
+                        <View style={styles.cardRight}>
+                          <Text
+                            style={[
+                              item.type === "Income" ? styles.incomeValue : styles.expenseValue,
+                            ]}
+                          >
+                            ${item.amount}
+                          </Text>
+
+                          <TouchableOpacity onPress={() => navigation.navigate("ManualEntry", { item })}>
+                            <Icon name="pencil" size={20} style={styles.editIcon} />
+                          </TouchableOpacity>
+                          <TouchableOpacity onPress={() => handleDelete(item.id)}>
+                            <Icon name="trash" size={20} color="red" style={styles.deleteIcon} />
+                          </TouchableOpacity>
+                        </View>
                       </View>
-
-                      <View style={styles.cardRight}>
-                        <Text
-                          style={[
-                            item.type === "Income"
-                              ? styles.incomeValue
-                              : styles.expenseValue,
-                          ]}
-                        >
-                          ${item.amount}
-                        </Text>
-
-                        <TouchableOpacity
-                          onPress={() => navigation.navigate("ManualEntry", { item })}
-                        >
-                          <Icon name="pencil" size={20} style={styles.editIcon} />
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                          <Icon name="trash" size={20} color="red" style={styles.deleteIcon} />
-                        </TouchableOpacity>
-
-                      </View>
-                    </View>
-                  ))}
+                    );
+                  })}
                 </View>
               );
             })}
           </View>
         )}
-
-
       </ScrollView>
 
       {/* ADD BUTTON */}
-      {/* <TouchableOpacity
-        onPress={() => navigation.navigate("ManualEntry", {item: null})}
-        style={styles.addButton}
-      >
-        <Text style={styles.addButtonText}>+</Text>
-      </TouchableOpacity> */}
       <FloatingButton />
     </View>
   );
@@ -234,19 +212,15 @@ export default function LogScreen({ navigation }: Props) {
 //  STYLES
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "white" },
-
   scrollContent: { padding: 20, paddingBottom: 120 },
-
   titleRow: {
     paddingTop: 50,
     marginBottom: 10,
   },
-
   titleText: {
     fontSize: 32,
     fontWeight: "700",
   },
-
   monthRow: {
     flexDirection: "row",
     alignItems: "center",
@@ -254,29 +228,24 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     gap: 15,
   },
-
   monthText: {
     fontSize: 20,
     fontWeight: "700",
   },
-
   summaryCard: {
     backgroundColor: "#D4EFF3",
     padding: 25,
     borderRadius: 20,
     marginBottom: 25,
   },
-
   summaryRow: {
     flexDirection: "row",
     justifyContent: "space-around",
   },
-
   summaryLabel: { fontSize: 20, fontWeight: "700" },
   expenseValue: { color: "red", fontSize: 22, fontWeight: "600" },
   incomeValue: { color: "green", fontSize: 22, fontWeight: "600" },
   balanceValue: { color: "black", fontSize: 22, fontWeight: "600" },
-
   groupContainer: {
     backgroundColor: "#D4EFF3",
     paddingVertical: 15,
@@ -285,13 +254,11 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     overflow: "hidden",
   },
-
   groupHeader: {
     fontSize: 18,
     fontWeight: "700",
-    marginBottom: 10,  // reduced from 15
+    marginBottom: 10,
   },
-
   card: {
     backgroundColor: "white",
     padding: 14,
@@ -302,18 +269,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     overflow: "hidden",
   },
-
-
   cardTitle: { fontSize: 16, fontWeight: "600" },
   cardCategory: { color: "gray", fontSize: 12 },
-
   cardRight: { flexDirection: "row", alignItems: "center" },
   cardLeft: { flex: 1 },
   editIcon: { marginLeft: 10 },
   deleteIcon: { marginLeft: 20 },
-
-
-
   addButton: {
     position: "absolute",
     right: 25,
@@ -325,7 +286,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
   },
-
   addButtonText: {
     fontSize: 40,
     color: "white",
@@ -338,18 +298,14 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginBottom: 30,
   },
-
   emptyContainer: {
     paddingTop: 40,
     paddingBottom: 120,
     alignItems: "center",
   },
-
   emptyText: {
     fontSize: 16,
     color: "#777",
     fontStyle: "italic",
   },
-
-
 });

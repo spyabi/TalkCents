@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   View,
   Text,
@@ -6,88 +6,185 @@ import {
   FlatList,
   TouchableOpacity,
   ScrollView,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
-import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { getPending, getApproved, Expenditure } from '../utils/expenditure';
-import Svg, { Path } from 'react-native-svg';
+} from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useNavigation } from "@react-navigation/native";
+import { getPending, getApproved, Expenditure, approveOne } from "../utils/expenditure";
+import Svg, { Path } from "react-native-svg";
+import { useTransactions, Transaction } from "../utils/TransactionsContext";
 
-type PendingItem = { id: string; label: string };
-type LegendItem = { label: string; amount: number; percent: number; color: string };
-
-type RootStackParamList = {
-  HomeTabs: undefined;
-  Login: undefined;
-  Log: undefined;
+type LegendItem = {
+  label: string;
+  amount: number;
+  percent: number;
+  color: string;
 };
 
-/* ---------- stable helpers OUTSIDE the component ---------- */
-const COLORS = ['#7aa8ab', '#bfe7ee', '#d8f3f7', '#a3c7d3', '#6e9fa8', '#cfe8ee'];
+/* ---------- helpers ---------- */
+const COLORS = ["#7aa8ab", "#bfe7ee", "#d8f3f7", "#a3c7d3", "#6e9fa8", "#cfe8ee"];
 const rad = (deg: number) => (deg * Math.PI) / 180;
-function arcPath(cx: number, cy: number, r: number, startDeg: number, endDeg: number) {
-  const start = { x: cx + r * Math.cos(rad(startDeg)), y: cy + r * Math.sin(rad(startDeg)) };
-  const end   = { x: cx + r * Math.cos(rad(endDeg)),   y: cy + r * Math.sin(rad(endDeg)) };
+
+function arcPath(
+  cx: number,
+  cy: number,
+  r: number,
+  startDeg: number,
+  endDeg: number
+) {
+  const start = {
+    x: cx + r * Math.cos(rad(startDeg)),
+    y: cy + r * Math.sin(rad(startDeg)),
+  };
+  const end = {
+    x: cx + r * Math.cos(rad(endDeg)),
+    y: cy + r * Math.sin(rad(endDeg)),
+  };
   const largeArc = endDeg - startDeg > 180 ? 1 : 0;
   return `M ${cx} ${cy} L ${start.x} ${start.y} A ${r} ${r} 0 ${largeArc} 1 ${end.x} ${end.y} Z`;
 }
-/* --------------------------------------------------------- */
+/* ------------------------------ */
 
 export default function HomeScreen() {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const [items, setItems] = useState<PendingItem[]>([]);
+  const navigation = useNavigation<any>(); // keep this simple
+
+  const [items, setItems] = useState<Transaction[]>([]);
   const [refreshing, setRefreshing] = useState(false);
   const [legendData, setLegendData] = useState<LegendItem[]>([]);
   const [totalSpent, setTotalSpent] = useState(0);
 
-  const goToLog = () => navigation.navigate('Log');
+  const hasPieData = legendData.some(seg => seg.amount > 0);
 
-  // /expenditure/pending -> pending list
+  // categories for icons
+  const { categories, reloadTransactions } = useTransactions();
+
+  const pickIcon = useCallback(
+    (name: string) =>
+      categories.find(
+        (c) => c.name.toLowerCase() === String(name).toLowerCase()
+      )?.icon ?? "",
+    [categories]
+  );
+
+  // pending list
   const loadItems = useCallback(async () => {
-    try {
-      const pending = await getPending();
-      const mapped: PendingItem[] = (pending ?? []).map((e) => ({
-        id: String(e.id),
-        label: e.name,
-      }));
-      setItems(mapped);
-    } catch (e) {
-      console.warn('Failed to fetch pending expenditures:', e);
-      setItems([]);
-    }
-  }, []);
+  try {
+    const pending = await getPending();
 
-  // /expenditure/approved -> totals by category + grand total
+    // Only include pending transactions
+    const mapped: Transaction[] = (pending ?? [])
+      .filter((e) => e.status === "PENDING")  // Ensure status is 'PENDING'
+      .map((e: any) => {
+        const backendId =
+          e.id ?? e.expenditure_id ?? e.expenditureId ?? e.uuid ?? e.pk;
+
+        return {
+          id: String(backendId),
+          type: "Expense",
+          name: e.name,
+          amount: Number(e.price) || 0,
+          date: new Date().toISOString(),
+          category: {
+            name: e.category || "Others",
+            icon: pickIcon(e.category || "Others"),
+          },
+          note: "",
+          status: e.status,  // Ensure status is set correctly
+        };
+      });
+
+    setItems(mapped);
+  } catch (e) {
+    console.warn("Failed to fetch pending expenditures:", e);
+    setItems([]);
+  }
+}, [pickIcon]);
+
+  // totals / pie
   const loadSpending = useCallback(async () => {
-    try {
-      const approved: Expenditure[] = await getApproved();
-      const byCat = approved.reduce<Record<string, number>>((acc, e) => {
-        const k = e.category || 'Uncategorized';
-        acc[k] = (acc[k] || 0) + (Number(e.price) || 0);
-        return acc;
-      }, {});
-      const total = Object.values(byCat).reduce((s, v) => s + v, 0);
-      setTotalSpent(total);
+  try {
+    const approved: Expenditure[] = await getApproved();
+    console.log("Approved expenditures:", approved);  // Log the response
 
-      const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
-      const legend: LegendItem[] = entries.map(([label, amount], i) => ({
-        label,
-        amount,
-        percent: total > 0 ? (amount / total) * 100 : 0,
-        color: COLORS[i % COLORS.length],
-      }));
-      setLegendData(legend);
-    } catch (e) {
-      console.warn('Failed to load approved expenditures:', e);
+    const byCat = approved.reduce<Record<string, number>>((acc, e) => {
+      const k = e.category || "Uncategorized";
+      // Ensure the amount is being correctly parsed as a number
+      const amount = Number(e.price);
+      console.log(`Processing expenditure for ${e.category}: ${amount}`);  // Debugging log
+
+      if (isNaN(amount)) {
+        console.warn(`Invalid amount detected for ${e.name}: ${e.price}`);
+      }
+
+      acc[k] = (acc[k] || 0) + amount;  // Add to the existing category
+      return acc;
+    }, {});
+
+    console.log("Spending by category:", byCat);  // Verify this data
+
+    const total = Object.values(byCat).reduce((s, v) => s + v, 0);
+    setTotalSpent(total);
+
+    if (total <= 0) {
       setLegendData([]);
-      setTotalSpent(0);
+      return;
     }
-  }, []);
 
-  // memoize SVG slices to keep render stable
+    const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+    const legend: LegendItem[] = entries.map(([label, amount], i) => ({
+      label,
+      amount,
+      percent: total > 0 ? (amount / total) * 100 : 0,
+      color: COLORS[i % COLORS.length],
+    }));
+    setLegendData(legend);
+
+  } catch (e) {
+    console.warn("Failed to load approved expenditures:", e);
+    setLegendData([]);
+    setTotalSpent(0);
+  }
+}, []);
+
+  // // go to Log screen (tab)
+  // const goToLog = useCallback(() => {
+  //   // same pattern as ManualEntryPage uses
+  //   navigation.navigate("HomeTabs", {
+  //     screen: "LogScreen",
+  //   });
+  // }, [navigation]);
+
+  // ✅ declare handleConfirm AFTER loadSpending + goToLog
+  const handleConfirm = useCallback(
+  async (tx: Transaction) => {
+    try {
+      console.log("Approving tx", tx.id);
+
+      // Approve the transaction in the backend
+      await approveOne(tx.id);
+
+      // Update the UI after the approval
+      await Promise.all([
+        loadItems(),          // reload pending list
+        loadSpending(),       // update spending data (pie chart, total)
+        reloadTransactions(), // update global context
+      ]);
+
+      navigation.navigate("HomeTabs", {
+        screen: "LogScreen",
+        params: { recentDate: tx.date },
+      });
+    } catch (e) {
+      console.warn("Failed to approve expenditure:", e);
+    }
+  },
+  [loadItems, loadSpending, reloadTransactions, navigation]
+);
+
+  // pie slices
   const pieSlices = useMemo(() => {
     const r = 85;
-    const cx = 85, cy = 85;
+    const cx = 85,
+      cy = 85;
     let angle = -90;
     return legendData.map((seg, idx) => {
       const sweep = (seg.percent / 100) * 360;
@@ -115,31 +212,28 @@ export default function HomeScreen() {
 
         {/* Pie */}
         <View style={styles.pieWrap}>
-          {legendData.length ? (
-            <Svg width={170} height={170}>
-              {pieSlices}
-            </Svg>
-          ) : (
-            // fallback: plain circle using a base color
-            <View
-              // eslint-disable-next-line react-native/no-inline-styles
-              style={{
-                width: 170,
-                height: 170,
-                borderRadius: 85,
-                backgroundColor: COLORS[0], // pick any color from COLORS
-              }}
-            />
-          )}
+  {hasPieData ? (
+    <Svg width={170} height={170}>
+      {pieSlices}
+    </Svg>
+  ) : (
+    <View
+      style={{
+          width: 170,
+          height: 170,
+          borderRadius: 85,
+          backgroundColor: "#e0e0e0", // Lighter color when no data is available
+      }}
+    />
+  )}
 
-          <Text style={styles.pieLabel}>
-            {legendData.length ? 'Spending by category' : 'No data'}
-          </Text>
-        </View>
-
+  <Text style={styles.pieLabel}>
+    {hasPieData ? "Spending by category" : "No data"}
+  </Text>
+</View>
 
         {/* Total from backend */}
-        <View style={{ alignItems: 'center', marginTop: 6 }}>
+        <View style={{ alignItems: "center", marginTop: 6 }}>
           <Text style={styles.totalTitle}>total expenditure</Text>
           <Text style={styles.totalValue}>${totalSpent.toFixed(2)}</Text>
         </View>
@@ -164,16 +258,16 @@ export default function HomeScreen() {
           <Text style={styles.pendingTitle}>Pending</Text>
           <FlatList
             data={items}
-            keyExtractor={(i) => i.id}
+            keyExtractor={(item) => item.id} 
             renderItem={({ item }) => (
               <PendingRow
-                label={item.label}
-                onEdit={goToLog}
-                onConfirm={goToLog}
+                tx={item}
+                onEdit={(tx) => navigation.navigate("ManualEntry", { item: tx })}
+                onConfirm={handleConfirm}
               />
             )}
             ListEmptyComponent={
-              <Text style={{ color: '#64748b', paddingVertical: 8 }}>
+              <Text style={{ color: "#64748b", paddingVertical: 8 }}>
                 No pending items.
               </Text>
             }
@@ -188,22 +282,26 @@ export default function HomeScreen() {
 }
 
 function PendingRow({
-  label,
+  tx,
   onEdit,
   onConfirm,
 }: {
-  label: string;
-  onEdit: () => void;
-  onConfirm: () => void;
+  tx: Transaction;
+  onEdit: (tx: Transaction) => void;
+  onConfirm: (tx: Transaction) => void;
 }) {
   return (
     <View style={styles.pendingRow}>
-      <Text style={styles.pendingLabel}>{label}</Text>
+      <Text style={styles.pendingLabel}>{tx.name}</Text>
+
+      {/* NEW: amount text, right before icons */}
+      <Text style={styles.pendingAmount}>${tx.amount.toFixed(2)}</Text>
+
       <View style={styles.pendingActions}>
-        <TouchableOpacity style={styles.iconBtn} onPress={onEdit}>
+        <TouchableOpacity style={styles.iconBtn} onPress={() => onEdit(tx)}>
           <Text style={styles.iconText}>✎</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.iconBtn} onPress={onConfirm}>
+        <TouchableOpacity style={styles.iconBtn} onPress={() => onConfirm(tx)}>
           <Text style={styles.iconText}>✔︎</Text>
         </TouchableOpacity>
       </View>
@@ -213,13 +311,13 @@ function PendingRow({
 
 /* ---------------- styles ---------------- */
 const c = {
-  bg: '#FFFFFF',
-  tint: '#cfe8ee',
-  tintDark: '#9ecad2',
-  text: '#0f172a',
-  muted: '#475569',
-  card: '#e9f5f7',
-  shadow: '#00000033',
+  bg: "#FFFFFF",
+  tint: "#cfe8ee",
+  tintDark: "#9ecad2",
+  text: "#0f172a",
+  muted: "#475569",
+  card: "#e9f5f7",
+  shadow: "#00000033",
 };
 
 const styles = StyleSheet.create({
@@ -227,31 +325,54 @@ const styles = StyleSheet.create({
   container: { paddingHorizontal: 20, paddingBottom: 140 },
   title: {
     fontSize: 28,
-    fontWeight: '700',
-    textAlign: 'center',
+    fontWeight: "700",
+    textAlign: "center",
     marginTop: 8,
     marginBottom: 10,
     color: c.text,
   },
-  pieWrap: { alignItems: 'center', justifyContent: 'center', flex: 1 },
+  pieWrap: { alignItems: "center", justifyContent: "center", flex: 1 },
   pieLabel: { marginTop: 6, color: c.muted, fontSize: 12 },
-  totalTitle: { fontSize: 14, fontWeight: '700', color: c.text, marginTop: 8 },
-  totalValue: { fontSize: 22, fontWeight: '800' },
-  legend: { flexDirection: 'column', marginTop: 10, gap: 8, paddingHorizontal: 8 },
-  legendItem: { flexDirection: 'row', alignItems: 'center' },
+  totalTitle: { fontSize: 14, fontWeight: "700", color: c.text, marginTop: 8 },
+  totalValue: { fontSize: 22, fontWeight: "800" },
+  legend: {
+    flexDirection: "column",
+    marginTop: 10,
+    gap: 8,
+    paddingHorizontal: 8,
+  },
+  legendItem: { flexDirection: "row", alignItems: "center" },
   dot: { width: 14, height: 14, borderRadius: 7, marginRight: 10 },
   legendText: { color: c.muted },
-  pendingCard: { marginTop: 16, padding: 14, backgroundColor: c.card, borderRadius: 18 },
-  pendingTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10 },
+  pendingCard: {
+    marginTop: 16,
+    padding: 14,
+    backgroundColor: c.card,
+    borderRadius: 18,
+  },
+  pendingTitle: { fontSize: 16, fontWeight: "700", marginBottom: 10 },
   pendingRow: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: c.tint, borderRadius: 10, paddingVertical: 10, paddingHorizontal: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: c.tint,
+    borderRadius: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 12,
   },
   pendingLabel: { flex: 1, color: c.text },
-  pendingActions: { flexDirection: 'row', gap: 12 },
-  iconBtn: {
-    width: 28, height: 28, borderRadius: 6, backgroundColor: '#000',
-    alignItems: 'center', justifyContent: 'center',
+  pendingAmount: {
+    marginRight: 10,
+    fontWeight: "600",
+    color: c.text,
   },
-  iconText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  pendingActions: { flexDirection: "row", gap: 12 },
+  iconBtn: {
+    width: 28,
+    height: 28,
+    borderRadius: 6,
+    backgroundColor: "#000",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  iconText: { color: "#fff", fontSize: 14, fontWeight: "700" },
 });
