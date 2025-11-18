@@ -1,49 +1,59 @@
-import React, { useState } from "react";
-import { View, Text, ScrollView, TouchableOpacity, StyleSheet, Alert } from "react-native";
-import Icon from "react-native-vector-icons/Ionicons";
-import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { useRoute, RouteProp } from "@react-navigation/native";
-import { AuthStackParamList } from "../navigation/AppStack";
-import { useTransactions, Transaction } from "../utils/TransactionsContext";
-import FloatingButton from "../components/FloatingButton";
+import React, { useState, useCallback } from 'react';
+import Icon from 'react-native-vector-icons/Ionicons';
+import {
+  View,
+  Text,
+  ScrollView,
+  TouchableOpacity,
+  StyleSheet,
+  Alert,
+} from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
+import { useRoute, RouteProp } from '@react-navigation/native';
+import { AuthStackParamList } from '../navigation/AppStack';
+import { useTransactions, Transaction } from '../utils/TransactionsContext';
+import FloatingButton from '../components/FloatingButton';
 
-type Props = NativeStackScreenProps<AuthStackParamList, "LogScreen">;
-
-
+type Props = NativeStackScreenProps<AuthStackParamList, 'LogScreen'>;
 
 export default function LogScreen({ navigation }: Props) {
   const today = new Date();
-  const { transactions, deleteTransaction } = useTransactions();
 
+  const { transactions, deleteTransaction, refreshTransactions } =
+    useTransactions();
 
+  useFocusEffect(
+    useCallback(() => {
+      refreshTransactions();
+    }, [refreshTransactions]),
+  );
 
   const handleDelete = (id: string) => {
     Alert.alert(
-      "Delete Entry",
-      "Are you sure you want to delete this transaction?",
+      'Delete Entry',
+      'Are you sure you want to delete this transaction?',
       [
-        { text: "Cancel", style: "cancel" },
+        { text: 'Cancel', style: 'cancel' },
         {
-          text: "Delete",
-          style: "destructive",
+          text: 'Delete',
+          style: 'destructive',
           onPress: () => deleteTransaction(id),
         },
-      ]
+      ],
     );
   };
 
-
-
-  //  MONTH LOGIC 
+  //  MONTH LOGIC
   const [selectedMonth, setSelectedMonth] = useState<number>(today.getMonth());
   const [selectedYear, setSelectedYear] = useState<number>(today.getFullYear());
 
   const goPrevMonth = () => {
     if (selectedMonth === 0) {
       setSelectedMonth(11);
-      setSelectedYear((prev) => prev - 1);
+      setSelectedYear(prev => prev - 1);
     } else {
-      setSelectedMonth((prev) => prev - 1);
+      setSelectedMonth(prev => prev - 1);
     }
   };
 
@@ -54,20 +64,30 @@ export default function LogScreen({ navigation }: Props) {
     if (isSameYear && isLastMonth) return;
     if (selectedMonth === 11) {
       setSelectedMonth(0);
-      setSelectedYear((prev) => prev + 1);
+      setSelectedYear(prev => prev + 1);
     } else {
-      setSelectedMonth((prev) => prev + 1);
+      setSelectedMonth(prev => prev + 1);
     }
   };
 
   const monthNames = [
-    "January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
   ];
 
   const monthLabel = `${monthNames[selectedMonth]} ${selectedYear}`;
 
-  type LogScreenRouteProp = RouteProp<AuthStackParamList, "LogScreen">;
+  type LogScreenRouteProp = RouteProp<AuthStackParamList, 'LogScreen'>;
   const route = useRoute<LogScreenRouteProp>();
   React.useEffect(() => {
     const recent = route.params?.recentDate;
@@ -79,28 +99,26 @@ export default function LogScreen({ navigation }: Props) {
     }
   }, [route.params?.recentDate]);
 
-
-
-  //  FILTER LOGIC 
-  const filtered = transactions.filter((t) => {
+  //  FILTER LOGIC
+  const filtered = transactions.filter(t => {
     const d = new Date(t.date);
     return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
   });
 
   const totalExpense = filtered
-    .filter((t) => t.type === "Expense")
+    .filter(t => t.type === 'Expense')
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
   const totalIncome = filtered
-    .filter((t) => t.type === "Income")
+    .filter(t => t.type === 'Income')
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
   const balance = totalIncome - totalExpense;
 
-  //  GROUPING 
+  //  GROUPING
   const grouped = filtered.reduce((acc: Record<string, Transaction[]>, t) => {
     const d = new Date(t.date);
-    const dateKey = d.toDateString();  // <-- ALWAYS SAME FORMAT
+    const dateKey = d.toDateString();
 
     if (!acc[dateKey]) acc[dateKey] = [];
     acc[dateKey].push(t);
@@ -108,16 +126,13 @@ export default function LogScreen({ navigation }: Props) {
     return acc;
   }, {});
 
-
   const sortedDates = Object.keys(grouped).sort(
-    (a, b) => new Date(b).getTime() - new Date(a).getTime()
+    (a, b) => new Date(b).getTime() - new Date(a).getTime(),
   );
-
 
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
-
         {/* TITLE */}
         <View style={styles.titleRow}>
           <Text style={styles.titleText}>Log</Text>
@@ -163,34 +178,31 @@ export default function LogScreen({ navigation }: Props) {
           </View>
         ) : (
           <View style={styles.monthContainer}>
-            {sortedDates.map((date) => {
+            {sortedDates.map(date => {
               const items = grouped[date];
               const d = new Date(date);
 
               return (
                 <View key={date} style={styles.groupContainer}>
-
                   <Text style={styles.groupHeader}>
-                    {d.toLocaleDateString("en-US", {
-                      weekday: "long",
-                      month: "short",
-                      day: "numeric",
+                    {d.toLocaleDateString('en-US', {
+                      weekday: 'long',
+                      month: 'short',
+                      day: 'numeric',
                     })}
                   </Text>
 
-                  {items.map((item) => (
+                  {items.map(item => (
                     <View key={item.id} style={styles.card}>
                       <View style={styles.cardLeft}>
                         <Text style={styles.cardTitle}>{item.name}</Text>
-                        <Text style={styles.cardCategory}>
-                          {item.category?.icon} {item.category?.name}
-                        </Text>
+                        <Text style={styles.cardCategory}>{item.category}</Text>
                       </View>
 
                       <View style={styles.cardRight}>
                         <Text
                           style={[
-                            item.type === "Income"
+                            item.type === 'Income'
                               ? styles.incomeValue
                               : styles.expenseValue,
                           ]}
@@ -199,14 +211,24 @@ export default function LogScreen({ navigation }: Props) {
                         </Text>
 
                         <TouchableOpacity
-                          onPress={() => navigation.navigate("ManualEntry", { item })}
+                          onPress={() =>
+                            navigation.navigate('ManualEntry', { item })
+                          }
                         >
-                          <Icon name="pencil" size={20} style={styles.editIcon} />
+                          <Icon
+                            name="pencil"
+                            size={20}
+                            style={styles.editIcon}
+                          />
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => handleDelete(item.id)}>
-                          <Icon name="trash" size={20} color="red" style={styles.deleteIcon} />
+                          <Icon
+                            name="trash"
+                            size={20}
+                            color="red"
+                            style={styles.deleteIcon}
+                          />
                         </TouchableOpacity>
-
                       </View>
                     </View>
                   ))}
@@ -215,8 +237,6 @@ export default function LogScreen({ navigation }: Props) {
             })}
           </View>
         )}
-
-
       </ScrollView>
 
       {/* ADD BUTTON */}
@@ -233,7 +253,7 @@ export default function LogScreen({ navigation }: Props) {
 
 //  STYLES
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "white" },
+  container: { flex: 1, backgroundColor: 'white' },
 
   scrollContent: { padding: 20, paddingBottom: 120 },
 
@@ -244,95 +264,92 @@ const styles = StyleSheet.create({
 
   titleText: {
     fontSize: 32,
-    fontWeight: "700",
+    fontWeight: '700',
   },
 
   monthRow: {
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     marginBottom: 20,
-    justifyContent: "center",
+    justifyContent: 'center',
     gap: 15,
   },
 
   monthText: {
     fontSize: 20,
-    fontWeight: "700",
+    fontWeight: '700',
   },
 
   summaryCard: {
-    backgroundColor: "#D4EFF3",
+    backgroundColor: '#D4EFF3',
     padding: 25,
     borderRadius: 20,
     marginBottom: 25,
   },
 
   summaryRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
+    flexDirection: 'row',
+    justifyContent: 'space-around',
   },
 
-  summaryLabel: { fontSize: 20, fontWeight: "700" },
-  expenseValue: { color: "red", fontSize: 22, fontWeight: "600" },
-  incomeValue: { color: "green", fontSize: 22, fontWeight: "600" },
-  balanceValue: { color: "black", fontSize: 22, fontWeight: "600" },
+  summaryLabel: { fontSize: 20, fontWeight: '700' },
+  expenseValue: { color: 'red', fontSize: 22, fontWeight: '600' },
+  incomeValue: { color: 'green', fontSize: 22, fontWeight: '600' },
+  balanceValue: { color: 'black', fontSize: 22, fontWeight: '600' },
 
   groupContainer: {
-    backgroundColor: "#D4EFF3",
+    backgroundColor: '#D4EFF3',
     paddingVertical: 15,
     paddingHorizontal: 15,
     borderRadius: 20,
     marginBottom: 20,
-    overflow: "hidden",
+    overflow: 'hidden',
   },
 
   groupHeader: {
     fontSize: 18,
-    fontWeight: "700",
-    marginBottom: 10,  // reduced from 15
+    fontWeight: '700',
+    marginBottom: 10, // reduced from 15
   },
 
   card: {
-    backgroundColor: "white",
+    backgroundColor: 'white',
     padding: 14,
     borderRadius: 15,
     marginBottom: 10,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    overflow: "hidden",
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    overflow: 'hidden',
   },
 
+  cardTitle: { fontSize: 16, fontWeight: '600' },
+  cardCategory: { color: 'gray', fontSize: 12 },
 
-  cardTitle: { fontSize: 16, fontWeight: "600" },
-  cardCategory: { color: "gray", fontSize: 12 },
-
-  cardRight: { flexDirection: "row", alignItems: "center" },
+  cardRight: { flexDirection: 'row', alignItems: 'center' },
   cardLeft: { flex: 1 },
   editIcon: { marginLeft: 10 },
   deleteIcon: { marginLeft: 20 },
 
-
-
   addButton: {
-    position: "absolute",
+    position: 'absolute',
     right: 25,
     bottom: 30,
-    backgroundColor: "black",
+    backgroundColor: 'black',
     borderRadius: 40,
     width: 70,
     height: 70,
-    justifyContent: "center",
-    alignItems: "center",
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
   addButtonText: {
     fontSize: 40,
-    color: "white",
+    color: 'white',
     marginTop: -4,
   },
   monthContainer: {
-    backgroundColor: "#D4EFF3",
+    backgroundColor: '#D4EFF3',
     paddingVertical: 20,
     paddingHorizontal: 15,
     borderRadius: 20,
@@ -342,14 +359,12 @@ const styles = StyleSheet.create({
   emptyContainer: {
     paddingTop: 40,
     paddingBottom: 120,
-    alignItems: "center",
+    alignItems: 'center',
   },
 
   emptyText: {
     fontSize: 16,
-    color: "#777",
-    fontStyle: "italic",
+    color: '#777',
+    fontStyle: 'italic',
   },
-
-
 });

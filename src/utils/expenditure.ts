@@ -2,12 +2,13 @@ import { getToken } from '../utils/auth'; // you already have this
 const BASE_URL = 'http://18.234.224.108:8000/api';
 
 export type Expenditure = {
-  id: string;
+  uuid: string;
   name: string;
   category: string;
-  price: number;
+  amount: number;
   status: 'PENDING' | 'APPROVED';
-  // ...add other fields if your backend returns them
+  notes: string;
+  date_of_expense: string;
 };
 
 async function authFetch(input: string, init: RequestInit = {}) {
@@ -51,13 +52,15 @@ export async function getApproved(): Promise<Expenditure[]> {
 // GET /expenditure/pending
 export async function getPending(): Promise<Expenditure[]> {
   const res = await authFetch('/expenditure/pending');
-  return res.json();
+  const data = await res.json()
+  console.log('PENDING DATA:', JSON.stringify(data));
+  return data;
 }
 
 // PATCH /expenditure/{id}
 export async function updateExpenditure(
   id: string,
-  body: Partial<Pick<Expenditure, 'name' | 'category' | 'price' | 'status'>>
+  body: any
 ): Promise<Expenditure> {
   const res = await authFetch(`/expenditure/${id}`, {
     method: 'PATCH',
