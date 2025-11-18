@@ -1,16 +1,87 @@
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#09C"
+    android:orientation="vertical"
+    android:background="#bae7ec"
     android:padding="16dp">
 
     <TextView
-        android:id="@+id/appwidget_text"
+        android:id="@+id/title"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
-        android:text="Hello Widget!"
-        android:textColor="#FFFFFF"
-        android:textSize="20sp"
-        android:textStyle="bold|italic"/>
-</RelativeLayout>
+        android:text="TalkCents"
+        android:textColor="#000000"
+        android:textStyle="bold"
+        android:textSize="22sp"
+        android:layout_gravity="center_horizontal" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center"
+        android:layout_marginTop="16dp">
+
+        <!-- Left Column -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginEnd="24dp">
+
+            <ImageButton
+                android:id="@+id/icon_graph_button"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:src="@drawable/icon_graph"
+                android:background="@android:color/transparent"
+                android:contentDescription="Graph Button"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                android:padding="0dp" />
+
+            <TextView
+                android:id="@+id/label_graph"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Analytics"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:layout_marginTop="4dp"
+                android:gravity="center" />
+        </LinearLayout>
+
+        <!-- Right Column -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center_horizontal"
+            android:layout_marginStart="24dp">
+
+            <ImageButton
+                android:id="@+id/icon_mic_button"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:src="@drawable/icon_mic"
+                android:background="@android:color/transparent"
+                android:contentDescription="Mic Button"
+                android:scaleType="fitCenter"
+                android:adjustViewBounds="true"
+                android:padding="0dp" />
+
+            <TextView
+                android:id="@+id/label_mic"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Talk"
+                android:textColor="#000000"
+                android:textSize="16sp"
+                android:layout_marginTop="4dp"
+                android:gravity="center" />
+        </LinearLayout>
+
+    </LinearLayout>
+</LinearLayout>
