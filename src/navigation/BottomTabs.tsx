@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import { NavigationContainer } from '@react-navigation/native';
+// import { NavigationContainer } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 
 // Import your screens
@@ -11,16 +11,27 @@ import LogScreen from '../screens/LogScreen';
 import SettingScreen from '../screens/SettingScreen';
 import FloatingButton from '../components/FloatingButton';
 
-const Tab = createBottomTabNavigator();
+export type BottomTabParamList = {
+  Home: undefined;
+  LogScreen: undefined;
+  Insights: undefined;
+  Settings: undefined;
+};
+
+
+// const Tab = createBottomTabNavigator();
+const Tab = createBottomTabNavigator<BottomTabParamList>();
+
 
 const ICONS: Record<string, string> = {
   Home: 'home',
-  Log: 'reader',
+  LogScreen: 'reader',
   Insights: 'analytics',
   Settings: 'settings',
 };
 
 export default function BottomTabs() {
+  
   return (
     <View style={{ flex: 1 }}>
       <Tab.Navigator
@@ -29,15 +40,15 @@ export default function BottomTabs() {
             <Icon name={ICONS[route.name]} size={size} color={color} />
           ),
           tabBarActiveTintColor: '#007AFF',
-          tabBarInactiveTintColor: '000000',
+          tabBarInactiveTintColor: '#000000',
           headerShown: false,
           tabBarStyle: styles.tabBar,
           tabBarItemStyle: styles.tabBarItemStyle
         })}
       >
-        <Tab.Screen name="Home" component={HomeScreen} />
-        <Tab.Screen name="Log" component={LogScreen} />
         <Tab.Screen name="Insights" component={InsightScreen} />
+        <Tab.Screen name="LogScreen" component={LogScreen} />
+        <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Settings" component={SettingScreen} />
       </Tab.Navigator>
       <FloatingButton/>
@@ -59,6 +70,7 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowRadius: 10,
     elevation: 2,
+    paddingBottom: 20,
   },
   tabBarItemStyle: {
 //     justifyContent: "center",
