@@ -8,6 +8,8 @@ import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
 
+import com.talkcents.MySecureStorageAndroid
+
 class SimpleWidget : AppWidgetProvider() {
     init {
         Log.d("Widget-LOG-Simple", "SimpleWidget init")
@@ -18,11 +20,33 @@ class SimpleWidget : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
-        for (appWidgetId in appWidgetIds) {
-            val views = buildMainWidgetRemoteViews(context, appWidgetId)
-            appWidgetManager.updateAppWidget(appWidgetId, views)
-            Log.d("Widget-LOG-Simple", "onUpdate applied main layout to widgetId=$appWidgetId")
+        val storage = MySecureStorageAndroid(context)
+        val token = storage.getToken()
+//        Log.d("Permissions", "Authenticated? $isAuthenticated")
+        Log.d("Permissions", "I have a FUCKINGGGG token: ${token ?: "null"}")
+        // Check authentication in background
+        storage.checkAuthStatus { isAuthenticated ->
+            // Now loop through all widgets
+            for (appWidgetId in appWidgetIds) {
+                val views = if (isAuthenticated) {
+                    buildMainWidgetRemoteViews(context, appWidgetId)
+                } else {
+                    Log.d("Permissions", "User $appWidgetId is NOT authenticated!")
+                    buildUnauthenticatedWidgetRemoteViews(context, appWidgetId)
+                }
+
+                appWidgetManager.updateAppWidget(appWidgetId, views)
+                Log.d("Widget-LOG-Simple", "Updated widgetId=$appWidgetId")
+            }
         }
+    }
+
+    private fun buildUnauthenticatedWidgetRemoteViews(context: Context, appWidgetId: Int): RemoteViews {
+        // Use a different layout, e.g., widget_unauthenticated.xml
+        val views = RemoteViews(context.packageName, R.layout.widget_unauthenticated)
+
+        Log.d("permissions", "buildUnauthenticatedWidgetRemoteViews for widgetId=$appWidgetId completed")
+        return views
     }
 
     private fun buildMainWidgetRemoteViews(context: Context, appWidgetId: Int): RemoteViews {
