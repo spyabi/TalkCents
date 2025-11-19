@@ -7,9 +7,9 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
-import com.talkcents.MySecureStorageAndroid
 
 class SimpleWidget : AppWidgetProvider() {
+
     init {
         Log.d("Widget-LOG-Simple", "SimpleWidget init")
     }
@@ -30,9 +30,7 @@ class SimpleWidget : AppWidgetProvider() {
                 } else {
                     buildUnauthenticatedWidgetRemoteViews(context, appWidgetId)
                 }
-
                 appWidgetManager.updateAppWidget(appWidgetId, views)
-                Log.d("Widget-LOG-Simple", "Updated widgetId=$appWidgetId")
             }
         }
     }
@@ -57,12 +55,11 @@ class SimpleWidget : AppWidgetProvider() {
         )
         views.setOnClickPendingIntent(R.id.icon_graph_button, graphPending)
 
-        // Talk button
-        val micIntent = Intent(context, SimpleWidget::class.java).apply {
-            action = "com.talkcents.MIC_CLICK"
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        // Talk button → launches RecordingStarterActivity
+        val micIntent = Intent(context, RecordingStarterActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
         }
-        val micPending = PendingIntent.getBroadcast(
+        val micPending = PendingIntent.getActivity(
             context,
             1,
             micIntent,
@@ -80,46 +77,19 @@ class SimpleWidget : AppWidgetProvider() {
         val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
         if (appWidgetId == -1) return
 
-        val talkWidget = TalkWidget(context)
-
-        // Make the when expression exhaustive by adding an else branch
         val views: RemoteViews = when (intent.action) {
 
-            "com.talkcents.GRAPH_CLICK" -> {
+            "com.talkcents.GRAPH_CLICK" ->
                 AnalyticsWidget(context).buildRemoteViews(appWidgetId)
-            }
 
-            "com.talkcents.MIC_CLICK" -> {
-                talkWidget.buildRemoteViews(appWidgetId)
-            }
-
-            "com.talkcents.RECORD_START_CLICK" -> {
-                talkWidget.startRecording(appWidgetId)
-                talkWidget.buildRemoteViews(appWidgetId)
-            }
-
-            "com.talkcents.RECORD_STOP_CLICK" -> {
-                // Stop handler so it does not keep updating widget
-                talkWidget.stopRecording()
-                Log.d("Widget-LOG-Simple", "RECORD_STOP_CLICK → Showing result widget")
-                TalkResultWidget(context).buildRemoteViews(
-                    appWidgetId,
-                    "Expense Recorded",
-                    "Mac's Lunch $10"
-                )
-            }
-
-            "com.talkcents.CANCEL_CLICK" -> {
+            "com.talkcents.CANCEL_CLICK" ->
                 buildMainWidgetRemoteViews(context, appWidgetId)
-            }
 
-            else -> {
-                Log.d("Widget-LOG-Simple", "Unknown action=${intent.action}, defaulting to main layout")
+            else ->
                 buildMainWidgetRemoteViews(context, appWidgetId)
-            }
         }
 
         appWidgetManager.updateAppWidget(appWidgetId, views)
-        Log.d("Widget-LOG-Simple", "updateAppWidget applied for widgetId=$appWidgetId")
     }
+
 }
