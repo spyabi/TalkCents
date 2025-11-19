@@ -1,12 +1,16 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
-
+import TutorialScreen from './TutorialScreen';
 const { width } = Dimensions.get('window');
 const { height } = Dimensions.get('window');
+import { NativeStackScreenProps } from "@react-navigation/native-stack";
+import { AuthStackParamList } from "../navigation/AppStack";
 
+type Props = NativeStackScreenProps<AuthStackParamList, "CreateAccount">;
 
-export default function CreateAccountPage({ navigation }) {
+export default function CreateAccountPage({ navigation }: Props) {
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -71,7 +75,8 @@ export default function CreateAccountPage({ navigation }) {
 
           <TouchableOpacity
             style={[styles.button, styles.createButton]}
-            onPress={() => console.log('Create Account pressed')}
+            // onPress={() => console.log('Create Account pressed')}
+            onPress={() => navigation.replace("Tutorial")}
           >
             <Text style={styles.buttonText}>Create Account</Text>
           </TouchableOpacity>

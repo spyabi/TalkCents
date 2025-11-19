@@ -13,6 +13,7 @@ import CameraScreen from '../screens/CameraScreen';
 import CategoryEditor from '../screens/CategoryEditor';
 import LoadingSpinner from '../components/LoadingSpinner'
 import { checkLogin } from '../utils/auth';
+import TutorialScreen from '../screens/TutorialScreen';
 
 export type AuthStackParamList = {
   Login: undefined;
@@ -27,6 +28,7 @@ export type AuthStackParamList = {
   CategoryEditor: { type: 'income' | 'expense' };
   LogScreen: { recentDate?: string; justAddedId?: string } | undefined;
   ManualEntry: { item: Transaction | null } | undefined;
+  Tutorial: undefined;
 };
 
 const Stack = createNativeStackNavigator<AuthStackParamList>();
@@ -50,18 +52,19 @@ export default function AppStack() {
     verify();
   }, []);
 
-  if (loading) return <LoadingSpinner/>;
+  if (loading) return <LoadingSpinner />;
 
   return (
     <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
       <Stack.Screen name="Login" component={LoginPage} />
       <Stack.Screen name="CreateAccount" component={CreateAccountPage} />
+      <Stack.Screen name="Tutorial" component={TutorialScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordPage} />
       <Stack.Screen name="HomeTabs" component={BottomTabs} />
       <Stack.Screen name="ManualEntry" component={ManualEntryPage} />
       {/* <Stack.Screen name= "LogScreen" component={LogScreen} /> */}
       <Stack.Screen
-        name="ChatBot"                               
+        name="ChatBot"
         component={ChatBotScreen}
         options={{
           headerShown: true,
