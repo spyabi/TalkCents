@@ -26,7 +26,7 @@ export type AuthStackParamList = {
   ChatBot: undefined;
   CameraScreen: undefined;
   CategoryEditor: { type: 'income' | 'expense' };
-  LogScreen: { recentDate?: string; justAddedId?: string } | undefined;
+  Log: { recentDate?: string; justAddedId?: string } | undefined;
   ManualEntry: { item: Transaction | null } | undefined;
   Tutorial: undefined;
 };

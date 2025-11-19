@@ -15,7 +15,7 @@ import { AuthStackParamList } from '../navigation/AppStack';
 import { useTransactions, Transaction } from '../utils/TransactionsContext';
 import FloatingButton from '../components/FloatingButton';
 
-type Props = NativeStackScreenProps<AuthStackParamList, 'LogScreen'>;
+type Props = NativeStackScreenProps<AuthStackParamList, 'Log'>;
 
 export default function LogScreen({ navigation }: Props) {
   const today = new Date();
@@ -87,7 +87,7 @@ export default function LogScreen({ navigation }: Props) {
 
   const monthLabel = `${monthNames[selectedMonth]} ${selectedYear}`;
 
-  type LogScreenRouteProp = RouteProp<AuthStackParamList, 'LogScreen'>;
+  type LogScreenRouteProp = RouteProp<AuthStackParamList, 'Log'>;
   const route = useRoute<LogScreenRouteProp>();
   React.useEffect(() => {
     const recent = route.params?.recentDate;
