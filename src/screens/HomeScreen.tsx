@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import Icon from 'react-native-vector-icons/Ionicons';
 import {
   View,
   Text,
@@ -8,12 +9,24 @@ import {
   ScrollView,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import { getPending, getApproved, Expenditure } from '../utils/expenditure';
+import {
+  getPending,
+  getApproved,
+  Expenditure,
+  approveOne,
+  deleteExpenditure,
+  approveAll,
+} from '../utils/expenditure';
 import Svg, { Path } from 'react-native-svg';
 
-type PendingItem = { id: string; name: string };
+type PendingItem = {
+  id: string;
+  name: string;
+  amount: number;
+  category: string;
+};
 type LegendItem = {
   label: string;
   amount: number;
@@ -67,8 +80,23 @@ export default function HomeScreen() {
   const [totalSpent, setTotalSpent] = useState(0);
 
   const goToLog = (item: any) => navigation.navigate('ManualEntry', { item });
-  const handleApprove = (id: any) => {
-    console.log(`HERE WORKING ${id}`);
+
+  const handleApprove = async (id: any) => {
+    await approveOne(id);
+    loadItems();
+    loadSpending();
+  };
+
+  const handleDelete = async (id: any) => {
+    await deleteExpenditure(id);
+    loadItems();
+    loadSpending();
+  };
+
+  const handleApproveAll = async () => {
+    await approveAll();
+    loadItems();
+    loadSpending();
   };
 
   // /expenditure/pending -> pending list
@@ -81,7 +109,7 @@ export default function HomeScreen() {
         date: String(e.date_of_expense),
         amount: Number(e.amount),
         category: String(e.category),
-        note: String(e.notes)
+        note: String(e.notes),
       }));
       setItems(mapped);
     } catch (e) {
@@ -116,6 +144,13 @@ export default function HomeScreen() {
       setTotalSpent(0);
     }
   }, []);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      loadItems();
+      loadSpending();
+    }, [loadItems, loadSpending]),
+  );
 
   // memoize SVG slices to keep render stable
   const pieSlices = useMemo(() => {
@@ -194,15 +229,32 @@ export default function HomeScreen() {
 
         {/* Pending list */}
         <View style={styles.pendingCard}>
-          <Text style={styles.pendingTitle}>Pending</Text>
+          <View style={styles.pendingHeaderRow}>
+            <Text style={styles.pendingTitle}>Pending</Text>
+
+            {/* 🟢 NEW APPROVE ALL BUTTON */}
+            {items.length > 0 && (
+              <TouchableOpacity
+                style={styles.approveAllBtn}
+                onPress={handleApproveAll}
+              >
+                <Text style={styles.approveAllText}>
+                  Approve All ({items.length})
+                </Text>
+              </TouchableOpacity>
+            )}
+          </View>
           <FlatList
             data={items}
             keyExtractor={i => i.id}
             renderItem={({ item }) => (
               <PendingRow
                 label={item.name}
+                amount={item.amount}
+                category={item.category}
                 onEdit={() => goToLog(item)}
-                onConfirm={handleApprove(item.id)}
+                onConfirm={() => handleApprove(item.id)}
+                onDelete={() => handleDelete(item.id)}
               />
             )}
             ListEmptyComponent={
@@ -222,22 +274,47 @@ export default function HomeScreen() {
 
 function PendingRow({
   label,
+  amount,
+  category,
   onEdit,
   onConfirm,
+  onDelete,
 }: {
   label: string;
+  amount: number;
+  category: string;
   onEdit: () => void;
-  onConfirm: any;
+  onConfirm: () => void;
+  onDelete: () => void;
 }) {
+  const isExpense = true;
+  const amountColor = isExpense ? 'red' : 'green';
+
   return (
     <View style={styles.pendingRow}>
-      <Text style={styles.pendingLabel}>{label}</Text>
+      <View style={styles.pendingDetails}>
+        <Text style={styles.pendingLabel}>{label}</Text>
+        <Text style={styles.pendingCategory}>{category}</Text>
+      </View>
+
+      <View style={styles.pendingAmountContainer}>
+        <Text style={[styles.pendingAmount, { color: amountColor }]}>
+          ${amount.toFixed(2)}
+        </Text>
+      </View>
+
       <View style={styles.pendingActions}>
+        {/* Edit */}
         <TouchableOpacity style={styles.iconBtn} onPress={onEdit}>
-          <Text style={styles.iconText}>✎</Text>
+          <Icon name="pencil" size={16} color="#fff" />
         </TouchableOpacity>
+
+        <TouchableOpacity style={styles.iconBtn} onPress={onDelete}>
+          <Icon name="trash" size={16} color="#fff" />
+        </TouchableOpacity>
+
         <TouchableOpacity style={styles.iconBtn} onPress={onConfirm}>
-          <Text style={styles.iconText}>✔︎</Text>
+          <Icon name="checkmark-circle" size={18} color="green" />
         </TouchableOpacity>
       </View>
     </View>
@@ -285,24 +362,72 @@ const styles = StyleSheet.create({
     backgroundColor: c.card,
     borderRadius: 18,
   },
-  pendingTitle: { fontSize: 16, fontWeight: '700', marginBottom: 10 },
+  pendingHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  approveAllBtn: {
+    backgroundColor: '#3EB6C5',
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+  },
+  approveAllText: {
+    color: 'white',
+    fontWeight: '600',
+    fontSize: 14,
+  },
+
+  pendingTitle: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+
   pendingRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     backgroundColor: c.tint,
     borderRadius: 10,
     paddingVertical: 10,
     paddingHorizontal: 12,
   },
-  pendingLabel: { flex: 1, color: c.text },
-  pendingActions: { flexDirection: 'row', gap: 12 },
+  pendingAmountContainer: {
+    flex: 3.0,
+    alignItems: 'flex-start',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  pendingAmount: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  pendingDetails: {
+    flex: 1.5,
+    paddingRight: 10,
+  },
+  pendingLabel: { color: c.text },
+  pendingCategory: {
+    fontSize: 12,
+    color: c.muted,
+    marginTop: 2,
+  },
+  pendingActions: {
+    flexDirection: 'row',
+    gap: 8,
+  },
   iconBtn: {
     width: 28,
     height: 28,
     borderRadius: 6,
-    backgroundColor: '#000',
+    backgroundColor: c.text,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  iconText: { color: '#fff', fontSize: 14, fontWeight: '700' },
+  iconText: {},
+
+  deleteIcon: {},
+  editIcon: {},
 });

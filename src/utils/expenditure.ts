@@ -34,7 +34,9 @@ export async function getExpenditures(): Promise<Expenditure[]> {
 
 // POST /expenditure
 export async function createExpenditure(body: {
-  name: string; category: string; price: number;
+  name: string;
+  category: string;
+  price: number;
 }): Promise<Expenditure> {
   const res = await authFetch('/expenditure', {
     method: 'POST',
@@ -52,7 +54,7 @@ export async function getApproved(): Promise<Expenditure[]> {
 // GET /expenditure/pending
 export async function getPending(): Promise<Expenditure[]> {
   const res = await authFetch('/expenditure/pending');
-  const data = await res.json()
+  const data = await res.json();
   console.log('PENDING DATA:', JSON.stringify(data));
   return data;
 }
@@ -60,7 +62,7 @@ export async function getPending(): Promise<Expenditure[]> {
 // PATCH /expenditure/{id}
 export async function updateExpenditure(
   id: string,
-  body: any
+  body: any,
 ): Promise<Expenditure> {
   const res = await authFetch(`/expenditure/${id}`, {
     method: 'PATCH',
@@ -76,7 +78,9 @@ export async function deleteExpenditure(id: string): Promise<void> {
 
 // PATCH /expenditure/approve/{id}
 export async function approveOne(id: string): Promise<Expenditure> {
-  const res = await authFetch(`/expenditure/approve/${id}`, { method: 'PATCH' });
+  const res = await authFetch(`/expenditure/approve/${id}`, {
+    method: 'PATCH',
+  });
   return res.json();
 }
 

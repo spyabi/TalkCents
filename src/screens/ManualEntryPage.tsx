@@ -47,7 +47,7 @@ export default function ManualEntryPage({ navigation, route }: Props) {
     if (itemToEdit) {
       setType(itemToEdit.type);
       setName(itemToEdit.name);
-      setCategory(itemToEdit.category)
+      setCategory(itemToEdit.category);
       setAmount(String(itemToEdit.amount));
       setSelectedDate(new Date(itemToEdit.date));
 
@@ -288,9 +288,9 @@ export default function ManualEntryPage({ navigation, route }: Props) {
               type,
               date: selectedDate.toISOString().split('T')[0],
               // Handle category object requirement if necessary
-              category: category ? category : "",
+              category: category ? category : '',
               note,
-              status: itemToEdit?.status ?? "Pending"
+              status: itemToEdit?.status ?? 'Pending',
             };
 
             if (isEditing) {
@@ -364,13 +364,14 @@ export default function ManualEntryPage({ navigation, route }: Props) {
               style={styles.successDoneBtn}
               onPress={() => {
                 setShowSuccess(false);
-                navigation.navigate('HomeTabs', {
-                  screen: 'LogScreen',
-                  params: {
-                    recentDate: selectedDate.toISOString(),
-                    justAddedId: lastSavedId ?? undefined,
-                  },
-                });
+                navigation.goBack();
+                // navigation.navigate('HomeTabs', {
+                //   screen: 'LogScreen',
+                //   params: {
+                //     recentDate: selectedDate.toISOString(),
+                //     justAddedId: lastSavedId ?? undefined,
+                //   },
+                // });
               }}
             >
               <Text style={styles.successDoneText}>Done</Text>
