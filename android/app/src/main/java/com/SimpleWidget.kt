@@ -90,26 +90,27 @@ class SimpleWidget : AppWidgetProvider() {
             }
 
             "com.talkcents.MIC_CLICK" -> {
+                // Update widget UI to show recording state
+                // 1. Start recording immediately
+                talkWidget.startRecording()
+
+                // 2. Build the RemoteViews and return it
                 talkWidget.buildRemoteViews(appWidgetId)
             }
 
-            "com.talkcents.RECORD_START_CLICK" -> {
-                talkWidget.startRecording(appWidgetId)
-                talkWidget.buildRemoteViews(appWidgetId)
-            }
-
+            // Both stop and cancel actions go through TalkWidget.stopRecording()
             "com.talkcents.RECORD_STOP_CLICK" -> {
-                // Stop handler so it does not keep updating widget
-                talkWidget.stopRecording()
-                Log.d("Widget-LOG-Simple", "RECORD_STOP_CLICK → Showing result widget")
-                TalkResultWidget(context).buildRemoteViews(
-                    appWidgetId,
-                    "Expense Recorded",
-                    "Mac's Lunch $10"
-                )
+                talkWidget.stopRecording(appWidgetId)
+                // stopRecording already updates the widget layout back to SimpleWidget
+                // Return dummy views here to satisfy type requirement
+                RemoteViews(context.packageName, R.layout.widget_layout)
             }
-
             "com.talkcents.CANCEL_CLICK" -> {
+                Log.d("Widget-LOG-Simple", "CANCEL_CLICK received, restoring main layout for widgetId=$appWidgetId")
+                buildMainWidgetRemoteViews(context, appWidgetId)
+            }
+            // used to bring back after stop click
+            "com.talkcents.RESET_WIDGET" -> {
                 buildMainWidgetRemoteViews(context, appWidgetId)
             }
 
