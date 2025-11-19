@@ -1,6 +1,7 @@
 // utils/auth.ts
 import * as Keychain from 'react-native-keychain';
 import { NativeModules } from 'react-native';
+const { MySecureStorage } = NativeModules;
 
 
 const API_URL = 'http://18.234.224.108:8000/api/user';
@@ -27,6 +28,20 @@ export async function loginUser(email: string, password: string): Promise<string
   console.log('permissions', "I LOGGED IN", "TOKEN:", token)
   // Securely store token
   await Keychain.setGenericPassword('user', token, { service: 'TalkCentsAuthToken' });
+
+  const tokenresult = await MySecureStorage.getToken();
+  console.log('permissions', 'MY CURRENT TOKEN', tokenresult)
+  // Store in native secure storage module
+  if (MySecureStorage?.saveToken) {
+    try {
+      MySecureStorage.saveToken(token);
+      const tokenresult2 = await MySecureStorage.getToken();
+      console.log('permissions', 'MY CURRENT TOKEN', tokenresult2)
+      console.log('permissions', 'Token saved via MySecureStorage');
+    } catch (err) {
+      console.warn('permissions', 'Error saving token in MySecureStorage:', err);
+    }
+  }
   return token;
 }
 
@@ -80,5 +95,12 @@ export async function logoutUser(): Promise<void> {
     console.log('permissions', 'MY TOKEN AFTER:', credentialsAfter?.password); // should be undefined / null
   } catch (error) {
     console.error('Error logging out:', error);
+  }
+
+  try {
+    const result = await MySecureStorage.removeToken();
+    console.log("permissions", "Token removed:", result); // true
+  } catch (err) {
+    console.error("permissions", "Failed to remove token:", err);
   }
 }

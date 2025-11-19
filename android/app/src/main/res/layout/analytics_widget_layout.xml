@@ -2,17 +2,47 @@
     android:id="@+id/analytics_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#bae7ec">
+    android:background="#bae7ec"
+    android:paddingStart="16dp"
+    android:paddingEnd="16dp"
+    android:paddingTop="16dp">
 
-    <TextView
-        android:id="@+id/analytics_label"
-        android:layout_width="wrap_content"
+    <!-- Vertical container for text -->
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Analytics View"
-        android:textColor="#FFFFFF"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:layout_gravity="center" />
+        android:orientation="vertical"
+        android:layout_gravity="top|start">
+
+        <TextView
+            android:id="@+id/title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TalkCents Analytics"
+            android:textColor="#000000"
+            android:textStyle="bold"
+            android:textSize="22sp" />
+
+        <TextView
+            android:id="@+id/analytics_today"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Spent today: --"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="16dp" />
+
+        <TextView
+            android:id="@+id/analytics_month"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Monthly expenditure: --"
+            android:textColor="#000000"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:layout_marginTop="8dp" />
+    </LinearLayout>
 
     <ImageButton
         android:id="@+id/icon_cancel_button"
