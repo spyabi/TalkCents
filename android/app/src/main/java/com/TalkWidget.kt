@@ -10,6 +10,7 @@ import android.util.Log
 import android.widget.RemoteViews
 
 class TalkWidget(private val context: Context) {
+
     init {
         Log.d("Widget-LOG-Talk", "TalkWidget init")
     }
@@ -18,18 +19,17 @@ class TalkWidget(private val context: Context) {
     private val handler = Handler(Looper.getMainLooper())
     private var currentAppWidgetId: Int = -1
 
+    // New: Keep track of active recording run
+    private var recordingRunnable: Runnable? = null
 
     fun buildRemoteViews(appWidgetId: Int): RemoteViews {
         currentAppWidgetId = appWidgetId
         val views = RemoteViews(context.packageName, R.layout.talk_widget_layout)
 
-        // stores backend data
-        val talkData = fetchTalkData()
-
-        // Set content button icon to start
+        views.setTextViewText(R.id.record_status_text, "Start Recording")
         views.setImageViewResource(R.id.talk_content_button, R.drawable.icon_record_start)
 
-        // Set cancel button to return to SimpleWidget
+        // Cancel button
         val cancelIntent = Intent(context, SimpleWidget::class.java).apply {
             action = "com.talkcents.CANCEL_CLICK"
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -43,7 +43,7 @@ class TalkWidget(private val context: Context) {
         )
         views.setOnClickPendingIntent(R.id.icon_cancel_button, cancelPendingIntent)
 
-        // Set content button click to start recording
+        // Start recording button
         val recordIntent = Intent(context, SimpleWidget::class.java).apply {
             action = "com.talkcents.RECORD_START_CLICK"
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -64,28 +64,48 @@ class TalkWidget(private val context: Context) {
         val appWidgetManager = AppWidgetManager.getInstance(context)
         secondsElapsed = 0
 
-        // change icon to stop
+        // Stop any previous handler run if it exists
+        recordingRunnable?.let { handler.removeCallbacks(it) }
+
         val views = RemoteViews(context.packageName, R.layout.talk_widget_layout)
+        views.setTextViewText(R.id.record_status_text, "Recording…")
         views.setImageViewResource(R.id.talk_content_button, R.drawable.icon_record_stop)
+
+        // Stop recording button → go to TalkResultWidget
+        val stopIntent = Intent(context, SimpleWidget::class.java).apply {
+            action = "com.talkcents.RECORD_STOP_CLICK"
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+        }
+        val stopPendingIntent = PendingIntent.getBroadcast(
+            context,
+            5,
+            stopIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        views.setOnClickPendingIntent(R.id.talk_content_button, stopPendingIntent)
+
         appWidgetManager.updateAppWidget(appWidgetId, views)
 
-        // start timer updates
-        handler.post(object : Runnable {
+        // Start handler loop
+        recordingRunnable = object : Runnable {
             override fun run() {
-                val hours = secondsElapsed / 3600
-                val minutes = (secondsElapsed % 3600) / 60
-                val seconds = secondsElapsed % 60
-                val timeString = String.format("%02d:%02d:%02d", hours, minutes, seconds)
+                Log.d("Widget-LOG-Talk", "Recording… still running (${secondsElapsed}s)")
 
                 val updateViews = RemoteViews(context.packageName, R.layout.talk_widget_layout)
-                updateViews.setTextViewText(R.id.recording_time, timeString)
+                updateViews.setTextViewText(R.id.record_status_text, "Recording…")
                 updateViews.setImageViewResource(R.id.talk_content_button, R.drawable.icon_record_stop)
+                updateViews.setOnClickPendingIntent(R.id.talk_content_button, stopPendingIntent)
+
+                // Cancel button
                 updateViews.setOnClickPendingIntent(
                     R.id.icon_cancel_button,
                     PendingIntent.getBroadcast(
                         context,
                         0,
-                        Intent(context, SimpleWidget::class.java).apply { action = "com.talkcents.CANCEL_CLICK"; putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId) },
+                        Intent(context, SimpleWidget::class.java).apply {
+                            action = "com.talkcents.CANCEL_CLICK"
+                            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                        },
                         PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
                     )
                 )
@@ -94,11 +114,15 @@ class TalkWidget(private val context: Context) {
                 secondsElapsed++
                 handler.postDelayed(this, 1000)
             }
-        })
+        }
+
+        handler.post(recordingRunnable!!)
     }
 
-    private fun fetchTalkData(): String {
-        // Do network call / local computation
-        return "Talk: 123"
+    // New: call this to stop the handler loop manually
+    fun stopRecording() {
+        recordingRunnable?.let { handler.removeCallbacks(it) }
+        recordingRunnable = null
+        Log.d("Widget-LOG-Talk", "Recording stopped, handler cleared")
     }
 }

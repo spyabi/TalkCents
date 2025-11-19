@@ -25,12 +25,12 @@
         android:gravity="center_vertical">
 
         <TextView
-            android:id="@+id/recording_time"
+            android:id="@+id/record_status_text"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="00:00:00"
+            android:text="Start Recording"
             android:textColor="#000000"
-            android:textSize="32sp"
+            android:textSize="24sp"
             android:textStyle="bold"
             android:layout_marginEnd="40dp"/>
 

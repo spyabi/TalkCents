@@ -7,7 +7,6 @@ import android.content.Context
 import android.content.Intent
 import android.util.Log
 import android.widget.RemoteViews
-
 import com.talkcents.MySecureStorageAndroid
 
 class SimpleWidget : AppWidgetProvider() {
@@ -22,16 +21,13 @@ class SimpleWidget : AppWidgetProvider() {
     ) {
         val storage = MySecureStorageAndroid(context)
         val token = storage.getToken()
-//        Log.d("Permissions", "Authenticated? $isAuthenticated")
-        Log.d("Permissions", "I have a FUCKINGGGG token: ${token ?: "null"}")
-        // Check authentication in background
+        Log.d("Permissions", "I have a token: ${token ?: "null"}")
+
         storage.checkAuthStatus { isAuthenticated ->
-            // Now loop through all widgets
             for (appWidgetId in appWidgetIds) {
                 val views = if (isAuthenticated) {
                     buildMainWidgetRemoteViews(context, appWidgetId)
                 } else {
-                    Log.d("Permissions", "User $appWidgetId is NOT authenticated!")
                     buildUnauthenticatedWidgetRemoteViews(context, appWidgetId)
                 }
 
@@ -42,17 +38,13 @@ class SimpleWidget : AppWidgetProvider() {
     }
 
     private fun buildUnauthenticatedWidgetRemoteViews(context: Context, appWidgetId: Int): RemoteViews {
-        // Use a different layout, e.g., widget_unauthenticated.xml
-        val views = RemoteViews(context.packageName, R.layout.widget_unauthenticated)
-
-        Log.d("permissions", "buildUnauthenticatedWidgetRemoteViews for widgetId=$appWidgetId completed")
-        return views
+        return RemoteViews(context.packageName, R.layout.widget_unauthenticated)
     }
 
     private fun buildMainWidgetRemoteViews(context: Context, appWidgetId: Int): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.widget_layout)
 
-        // Graph button intent
+        // Graph button
         val graphIntent = Intent(context, SimpleWidget::class.java).apply {
             action = "com.talkcents.GRAPH_CLICK"
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -64,8 +56,8 @@ class SimpleWidget : AppWidgetProvider() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setOnClickPendingIntent(R.id.icon_graph_button, graphPending)
-        
-        // Talk button intent
+
+        // Talk button
         val micIntent = Intent(context, SimpleWidget::class.java).apply {
             action = "com.talkcents.MIC_CLICK"
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
@@ -78,19 +70,6 @@ class SimpleWidget : AppWidgetProvider() {
         )
         views.setOnClickPendingIntent(R.id.icon_mic_button, micPending)
 
-        // Root intent to do nothing when widget is clicked
-        val rootIntent = Intent(context, SimpleWidget::class.java).apply {
-            action = "com.talkcents.DO_NOTHING"
-        }
-        val rootPending = PendingIntent.getBroadcast(
-            context,
-            2,
-            rootIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        views.setOnClickPendingIntent(R.id.widget_root, rootPending)
-
-        Log.d("Widget-LOG-Simple", "buildMainWidgetRemoteViews for widgetId=$appWidgetId completed")
         return views
     }
 
@@ -101,26 +80,41 @@ class SimpleWidget : AppWidgetProvider() {
         val appWidgetId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1)
         if (appWidgetId == -1) return
 
-        val views = when (intent.action) {
+        val talkWidget = TalkWidget(context)
+
+        // Make the when expression exhaustive by adding an else branch
+        val views: RemoteViews = when (intent.action) {
+
             "com.talkcents.GRAPH_CLICK" -> {
-                Log.d("Widget-LOG-Simple", "GRAPH_CLICK received for widgetId=$appWidgetId")
                 AnalyticsWidget(context).buildRemoteViews(appWidgetId)
             }
+
             "com.talkcents.MIC_CLICK" -> {
-                Log.d("Widget-LOG-Simple", "MIC_CLICK received for widgetId=$appWidgetId")
-                TalkWidget(context).buildRemoteViews(appWidgetId)
+                talkWidget.buildRemoteViews(appWidgetId)
             }
-            "com.talkcents.CANCEL_CLICK" -> {
-                Log.d("Widget-LOG-Simple", "CANCEL_CLICK received, restoring main layout for widgetId=$appWidgetId")
-                buildMainWidgetRemoteViews(context, appWidgetId)
-            }
+
             "com.talkcents.RECORD_START_CLICK" -> {
-                Log.d("Widget-LOG-Simple", "RECORD_START_CLICK received for widgetId=$appWidgetId")
-                TalkWidget(context).startRecording(appWidgetId)
+                talkWidget.startRecording(appWidgetId)
+                talkWidget.buildRemoteViews(appWidgetId)
+            }
+
+            "com.talkcents.RECORD_STOP_CLICK" -> {
+                // Stop handler so it does not keep updating widget
+                talkWidget.stopRecording()
+                Log.d("Widget-LOG-Simple", "RECORD_STOP_CLICK → Showing result widget")
+                TalkResultWidget(context).buildRemoteViews(
+                    appWidgetId,
+                    "Expense Recorded",
+                    "Mac's Lunch $10"
+                )
+            }
+
+            "com.talkcents.CANCEL_CLICK" -> {
                 buildMainWidgetRemoteViews(context, appWidgetId)
             }
+
             else -> {
-                Log.d("Widget-LOG-Simple", "Unknown action=${intent.action}, defaulting to main layout for widgetId=$appWidgetId")
+                Log.d("Widget-LOG-Simple", "Unknown action=${intent.action}, defaulting to main layout")
                 buildMainWidgetRemoteViews(context, appWidgetId)
             }
         }
