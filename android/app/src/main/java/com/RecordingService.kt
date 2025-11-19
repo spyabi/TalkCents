@@ -11,8 +11,12 @@ import android.os.IBinder
 import android.util.Log
 import androidx.core.content.ContextCompat
 import android.appwidget.AppWidgetManager
-import android.widget.RemoteViews
 import java.io.File
+import java.io.FileInputStream
+import java.io.OutputStream
+import java.net.HttpURLConnection
+import java.net.URL
+import com.talkcents.MySecureStorageAndroid
 
 class RecordingService : Service() {
 
@@ -22,6 +26,7 @@ class RecordingService : Service() {
         const val NOTIF_CHANNEL_ID = "RecordingServiceChannel"
         const val NOTIF_ID = 101
         const val BROADCAST_UPDATE = "com.talkcents.RECORDING_UPDATE"
+        const val BACKEND_URL = "http://18.234.224.108:8000/api/llm/audio-to-expenditure"
     }
 
     private var isRecording = false
@@ -140,9 +145,86 @@ class RecordingService : Service() {
         }
         sendBroadcast(broadcast)
 
+        // Fire-and-forget API call to backend
+        Thread {
+            try {
+                // Retrieve token from secure storage
+                val storage = MySecureStorageAndroid(this)
+                val token = storage.getToken()
+
+                // Upload audio with token
+                uploadAudioToBackend(audioFilePath, token)
+            } catch (ex: Exception) {
+                Log.e("Widget-LOG-RecordingService", "Failed to upload audio", ex)
+            }
+        }.start()
+
         stopForeground(true)
         stopSelf()
     }
+
+    private fun uploadAudioToBackend(filePath: String, token: String?) {
+        val boundary = "*****" + System.currentTimeMillis() + "*****"
+        val lineEnd = "\r\n"
+        val twoHyphens = "--"
+
+        val file = File(filePath)
+        if (!file.exists()) {
+            Log.e("Widget-LOG-RecordingService", "File does not exist: $filePath")
+            return
+        }
+
+        val url = URL(BACKEND_URL)
+        val connection = url.openConnection() as HttpURLConnection
+        connection.apply {
+            doInput = true
+            doOutput = true
+            useCaches = false
+            requestMethod = "POST"
+            connectTimeout = 15000
+            readTimeout = 15000
+            setChunkedStreamingMode(0) // <-- important for large files
+            setRequestProperty("Connection", "Keep-Alive")
+            setRequestProperty("ENCTYPE", "multipart/form-data")
+            setRequestProperty("Content-Type", "multipart/form-data;boundary=$boundary")
+            setRequestProperty("file", file.name)
+            if (!token.isNullOrEmpty()) {
+                setRequestProperty("Authorization", "Bearer $token")
+            }
+        }
+
+        val outputStream = connection.outputStream
+        outputStream.apply {
+            write((twoHyphens + boundary + lineEnd).toByteArray())
+            write(("Content-Disposition: form-data; name=\"file\"; filename=\"${file.name}\"$lineEnd").toByteArray())
+            write(("Content-Type: audio/m4a$lineEnd").toByteArray())
+            write(lineEnd.toByteArray())
+
+            FileInputStream(file).use { fis ->
+                val buffer = ByteArray(4096) // smaller buffer is safer
+                var bytesRead: Int
+                while (fis.read(buffer).also { bytesRead = it } != -1) {
+                    write(buffer, 0, bytesRead)
+                }
+            }
+
+            write(lineEnd.toByteArray())
+            write((twoHyphens + boundary + twoHyphens + lineEnd).toByteArray())
+            flush()
+            close()
+        }
+
+        // Only get response code, don't read body
+        try {
+            val responseCode = connection.responseCode
+            Log.d("Widget-LOG-RecordingService", "Audio uploaded, response code: $responseCode")
+        } catch (ex: Exception) {
+            Log.e("Widget-LOG-RecordingService", "Upload finished with exception (ignored)", ex)
+        } finally {
+            connection.disconnect()
+        }
+    }
+
 
     private fun buildNotification(contentText: String): Notification {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
