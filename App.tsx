@@ -34,7 +34,7 @@ function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
 
   return (
-    <View style={styles.container}>
+    <View style={{flex:1, paddingBottom: safeAreaInsets.bottom}}>
       {/* <LoginPage/> */}
       {/* <BottomTabs/>
       <FloatingButton/> */}
