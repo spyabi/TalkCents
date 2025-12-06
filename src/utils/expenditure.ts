@@ -1,5 +1,5 @@
 import { getToken } from '../utils/auth'; // you already have this
-const BASE_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app/docs#';
+const BASE_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app';
 
 export type Expenditure = {
   uuid: string;

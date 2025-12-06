@@ -4,7 +4,7 @@ import { NativeModules } from 'react-native';
 const { MySecureStorage } = NativeModules;
 
 
-const API_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app/docs#/user';
+const API_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app/user';
 
 export async function loginUser(email: string, password: string): Promise<string> {
   console.log('permissions', 'Keychain module:', Keychain);

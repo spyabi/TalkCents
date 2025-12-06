@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Icon from 'react-native-vector-icons/Ionicons';
-// import LoginPage from '../screens/LoginPage';
+import LoginPage from '../screens/LoginPage';
 import CreateAccountPage from '../screens/CreateAccountPage';
 import ForgotPasswordPage from '../screens/ForgotPasswordPage';
 import BottomTabs from './BottomTabs';
@@ -56,7 +56,7 @@ export default function AppStack() {
 
   return (
     <Stack.Navigator initialRouteName={initialRoute} screenOptions={{ headerShown: false }}>
-      {/* <Stack.Screen name="Login" component={LoginPage} /> */}
+      <Stack.Screen name="Login" component={LoginPage} />
       <Stack.Screen name="CreateAccount" component={CreateAccountPage} />
       <Stack.Screen name="Tutorial" component={TutorialScreen} />
       <Stack.Screen name="ForgotPassword" component={ForgotPasswordPage} />

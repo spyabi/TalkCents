@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { getToken } from './auth';
 
-const API_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app/docs#';
+const API_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app';
 
 export type Category = {
   name: string;
