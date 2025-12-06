@@ -31,7 +31,6 @@ export default function SettingScreen() {
       {/* Main scrollable content */}
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.titleRow}>
-          <Text style={styles.gear}>⚙️</Text>
           <Text style={styles.title}>Settings</Text>
         </View>
 
@@ -83,12 +82,12 @@ function ListItem({ label, isLast, onPress }: { label: string; isLast?: boolean;
 }
 
 const c = {
-  bg: '#FFFFFF',
-  text: '#0f172a',
-  muted: '#475569',
-  tint: '#cfe8ee',
-  card: '#e6f3f6',
-  danger: '#FF3B30',
+  bg: '#f7fbff',          // soft blue background (like login)
+  text: '#111827',
+  muted: '#6b7280',
+  card: '#e6eefc',        // pale blue card (same feel as total card)
+  accent: '#9DB7FF',      // app primary blue
+  danger: '#000000ff',
 };
 
 const styles = StyleSheet.create({
