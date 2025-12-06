@@ -7,7 +7,7 @@ import React, {
 } from 'react';
 import { getToken } from './auth';
 
-const API_URL = 'http://18.234.224.108:8000/api';
+const API_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app';
 
 export type Category = {
   name: string;
@@ -61,8 +61,8 @@ export const TransactionsProvider = ({
       const d = raw.date_of_expense
         ? new Date(raw.date_of_expense)
         : raw.date
-        ? new Date(raw.date)
-        : new Date();
+          ? new Date(raw.date)
+          : new Date();
       return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
     })();
 

@@ -108,23 +108,44 @@ export default function ManualEntryPage({ navigation, route }: Props) {
 
         {/* Toggle Income / Expense */}
         <View style={styles.toggleContainer}>
+          <TouchableOpacity onPress={() => setType('Income')}>
+            <Text style={[
+              styles.toggleText,
+              type === 'Income' && styles.activeToggleText
+            ]}>
+              Income
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity onPress={() => setType('Expense')}>
+            <Text style={[
+              styles.toggleText,
+              type === 'Expense' && styles.activeToggleText
+            ]}>
+              Expense
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        {/* <View style={styles.segmentWrapper}>
           <TouchableOpacity
-            style={[styles.toggleBtn, type === 'Income' && styles.activeToggle]}
+            style={[styles.segment, type === 'Income' && styles.segmentActive]}
             onPress={() => setType('Income')}
           >
-            <Text style={styles.toggleText}>Income</Text>
+            <Text style={[styles.segmentText, type === 'Income' && styles.segmentTextActive]}>
+              Income
+            </Text>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={[
-              styles.toggleBtn,
-              type === 'Expense' && styles.activeToggle,
-            ]}
+            style={[styles.segment, type === 'Expense' && styles.segmentActive]}
             onPress={() => setType('Expense')}
           >
-            <Text style={styles.toggleText}>Expense</Text>
+            <Text style={[styles.segmentText, type === 'Expense' && styles.segmentTextActive]}>
+              Expense
+            </Text>
           </TouchableOpacity>
-        </View>
+        </View> */}
 
         {/* NAME */}
         <View style={styles.inputGroup}>
@@ -403,25 +424,35 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     marginTop: 60,
   },
-  toggleContainer: {
+  segmentWrapper: {
     flexDirection: 'row',
-    justifyContent: 'center',
-    marginBottom: 20,
-    gap: 12,
-  },
-  toggleBtn: {
-    paddingVertical: 10,
-    paddingHorizontal: 20,
     borderWidth: 1,
-    borderRadius: 12,
-    borderColor: '#c0c0c0',
+    borderColor: '#E5E7EB',
+    borderRadius: 3,
+    overflow: 'hidden',
+    marginBottom: 20,
+    alignSelf: 'center',
   },
-  activeToggle: {
-    backgroundColor: '#BAE7EC',
+  segment: {
+    flex: 1,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
   },
-  toggleText: {
+
+  segmentActive: {
+    backgroundColor: 'rgba(145, 185, 250, 0.2)',
+  },
+
+  segmentText: {
     fontSize: 16,
     fontWeight: '600',
+    color: '#00000',
+  },
+
+  segmentTextActive: {
+    color: '#006EA2',
   },
   inputGroup: {
     marginBottom: 18,
@@ -433,8 +464,8 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
+    borderColor: '#E5E7EB',
+    borderRadius: 3,
     padding: 12,
     fontSize: 16,
   },
@@ -450,8 +481,8 @@ const styles = StyleSheet.create({
   },
   dropdown: {
     borderWidth: 1,
-    borderColor: '#ccc',
-    borderRadius: 8,
+    borderColor: '#E5E7EB',
+    borderRadius: 3,
     padding: 12,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -460,18 +491,20 @@ const styles = StyleSheet.create({
   noteBox: {
     height: 100,
     textAlignVertical: 'top',
+    borderColor: '#E5E7EB'
   },
   addBtn: {
     marginTop: 10,
     alignSelf: 'flex-end',
-    backgroundColor: '#BAE7EC',
+    backgroundColor: 'rgba(145, 185, 250, 0.2)',
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 10,
+    borderRadius: 3,
   },
   addBtnText: {
     fontWeight: '600',
     fontSize: 16,
+    color: "#006EA2"
   },
   doneBtn: {
     backgroundColor: 'white',
@@ -538,7 +571,7 @@ const styles = StyleSheet.create({
   successModal: {
     width: '80%',
     backgroundColor: 'white',
-    borderRadius: 22,
+    borderRadius: 10,
     paddingVertical: 30,
     paddingHorizontal: 20,
     alignItems: 'center',
@@ -556,14 +589,42 @@ const styles = StyleSheet.create({
     marginBottom: 22,
   },
   successDoneBtn: {
-    backgroundColor: '#BAE7EC',
+    backgroundColor: 'rgba(145, 185, 250, 0.2)',
     paddingVertical: 10,
     paddingHorizontal: 28,
-    borderRadius: 10,
+    borderRadius: 3,
   },
   successDoneText: {
     fontSize: 16,
     fontWeight: '700',
     color: '#000',
   },
+
+
+
+  toggleContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginBottom: 20,
+    gap: 28,
+    paddingHorizontal: 4,
+  },
+
+  toggleBtn: {
+    paddingVertical: 6,
+  },
+
+  toggleText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#666',
+  },
+
+  activeToggleText: {
+    color: '#006EA2',
+    borderBottomWidth: 3,
+    borderBottomColor: '#006EA2',
+    paddingBottom: 4,
+  },
+
 });

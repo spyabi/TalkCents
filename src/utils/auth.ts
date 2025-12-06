@@ -4,7 +4,7 @@ import { NativeModules } from 'react-native';
 const { MySecureStorage } = NativeModules;
 
 
-const API_URL = 'http://18.234.224.108:8000/api/user';
+const API_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app/user';
 
 export async function loginUser(email: string, password: string): Promise<string> {
   console.log('permissions', 'Keychain module:', Keychain);
@@ -86,13 +86,13 @@ export async function getToken(): Promise<string | null> {
 export async function logoutUser(): Promise<void> {
   try {
     const credentialsBefore = await Keychain.getGenericPassword({ service: 'TalkCentsAuthToken' });
-    console.log('permissions', 'MY TOKEN BEFORE:', credentialsBefore?.password);
+    // console.log('permissions', 'MY TOKEN BEFORE:', credentialsBefore?.password);
 
     // Reset / delete credentials
     await Keychain.resetGenericPassword({ service: 'TalkCentsAuthToken' });
 
     const credentialsAfter = await Keychain.getGenericPassword({ service: 'TalkCentsAuthToken' });
-    console.log('permissions', 'MY TOKEN AFTER:', credentialsAfter?.password); // should be undefined / null
+    // console.log('permissions', 'MY TOKEN AFTER:', credentialsAfter?.password); // should be undefined / null
   } catch (error) {
     console.error('Error logging out:', error);
   }
