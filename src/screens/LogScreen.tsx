@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    alignItems: 'center'
+    alignItems: 'center',
   },
   summaryItem:{
     alignItems: 'center',
@@ -340,9 +340,9 @@ const styles = StyleSheet.create({
   },
 
   groupHeader: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: '700',
-    marginBottom: 10, // reduced from 15
+    marginBottom: 10,
   },
 
   card: {
