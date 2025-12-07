@@ -119,33 +119,54 @@ export default function HomeScreen() {
       setItems([]);
     }
   }, []);
+
+   // /expenditure
+  function isInCurrentMonth(dateStr: string) {
+  const d = new Date(dateStr);
+  if (Number.isNaN(d.getTime())) return false;
+
+  const now = new Date();
+  return (
+    d.getFullYear() === now.getFullYear() &&
+    d.getMonth() === now.getMonth()
+  );
+}
  
-  // /expenditure/approved -> totals by category + grand total
-  const loadSpending = useCallback(async () => {
-    try {
-      const approved: Expenditure[] = await getApproved();
-      const byCat = approved.reduce<Record<string, number>>((acc, e) => {
+const loadSpending = useCallback(async () => {
+  try {
+    const approved: Expenditure[] = await getApproved();
+
+    // ✅ keep ONLY expenses from the current month & year
+    const currentMonthApproved = approved.filter(e =>
+      isInCurrentMonth(e.date_of_expense)
+    );
+
+    const byCat = currentMonthApproved.reduce<Record<string, number>>(
+      (acc, e) => {
         const k = e.category || 'Uncategorized';
         acc[k] = (acc[k] || 0) + (Number(e.amount) || 0);
         return acc;
-      }, {});
-      const total = Object.values(byCat).reduce((s, v) => s + v, 0);
-      setTotalSpent(total);
+      },
+      {},
+    );
 
-      const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
-      const legend: LegendItem[] = entries.map(([label, amount], i) => ({
-        label,
-        amount,
-        percent: total > 0 ? (amount / total) * 100 : 0,
-        color: COLORS[i % COLORS.length],
-      }));
-      setLegendData(legend);
-    } catch (e) {
-      console.warn('Failed to load approved expenditures:', e);
-      setLegendData([]);
-      setTotalSpent(0);
-    }
-  }, []);
+    const total = Object.values(byCat).reduce((s, v) => s + v, 0);
+    setTotalSpent(total);
+
+    const entries = Object.entries(byCat).sort((a, b) => b[1] - a[1]);
+    const legend: LegendItem[] = entries.map(([label, amount], i) => ({
+      label,
+      amount,
+      percent: total > 0 ? (amount / total) * 100 : 0,
+      color: COLORS[i % COLORS.length],
+    }));
+    setLegendData(legend);
+  } catch (e) {
+    console.warn('Failed to load approved expenditures:', e);
+    setLegendData([]);
+    setTotalSpent(0);
+  }
+}, []);
 
   useFocusEffect(
     React.useCallback(() => {
