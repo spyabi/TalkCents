@@ -1,4 +1,5 @@
 import React, { useState} from "react";
+import { forwardRef, useImperativeHandle } from 'react';
 import { View, TouchableOpacity, StyleSheet, Animated, Text } from "react-native";
 // import Icon from "react-native-vector-icons/MaterialIcons";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -7,10 +8,10 @@ import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import type { AuthStackParamList } from "../navigation/AppStack";
 
 type Nav = NativeStackNavigationProp<AuthStackParamList>;
-
+export type FABRef = { popOut: () => void };
 const FAB_COLOR = '#9DB7FF';
 
-const FloatingButton = () => {
+const FloatingButton = forwardRef<FABRef>((props, ref) => {
   const navigation = useNavigation<Nav>();
   const [icon_2_1] = useState(new Animated.Value(40));
   const [icon_2_2] = useState(new Animated.Value(40));
@@ -35,9 +36,9 @@ const FloatingButton = () => {
       duration: 500,
       useNativeDriver: false,
     }).start();
-    setTimeout(() => {
-    popOut();
-  }, 3000);
+//     setTimeout(() => {
+//     popOut();
+//   }, 10000);
   }
 
   const popOut = () => {
@@ -58,6 +59,8 @@ const FloatingButton = () => {
       useNativeDriver: false,
     }).start();
   }
+  // Expose popOut to parent via ref
+  useImperativeHandle(ref, () => ({ popOut }));
 
   return(
     <View style={styles.container}>
@@ -67,7 +70,7 @@ const FloatingButton = () => {
           { right: icon_3 },
         ]}
       >
-        <TouchableOpacity onPress={() => {navigation.navigate("ChatBot");}}>
+        <TouchableOpacity onPress={() => {navigation.navigate("ChatBot");popOut();}}>
           <View style={styles.menuContent}>
             <Icon name="logo-android" size={22} color="#000" />
             <Text style={styles.menuText}>AI Entry</Text>
@@ -81,7 +84,7 @@ const FloatingButton = () => {
           { bottom: icon_2_1, right: icon_2_2 },
         ]}
       >
-        <TouchableOpacity onPress={() => {navigation.navigate("ManualEntry", { item: null });}}>
+        <TouchableOpacity onPress={() => {navigation.navigate("ManualEntry", { item: null });popOut();}}>
           <View style={styles.menuContent}>
             <Icon name="create" size={22} color="#000" />
             <Text style={styles.menuText}>Manual Entry</Text>
@@ -101,7 +104,7 @@ const FloatingButton = () => {
       </TouchableOpacity>
     </View>
   );
-};
+});
 //     <View style={styles.container}>
 //       <Animated.View style={[styles.circle, { bottom: icon_2_1, right: icon_2_2}]}>
 //         <TouchableOpacity onPress={() => navigation.navigate('ChatBot')}>
