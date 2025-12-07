@@ -3,6 +3,7 @@ import {View, StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 // import { NavigationContainer } from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
+import { Platform } from 'react-native';
 
 // Import your screens
 import HomeScreen from '../screens/HomeScreen';
@@ -70,7 +71,8 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 10 },
     shadowRadius: 10,
     elevation: 2,
-    paddingBottom: 20,
+    paddingBottom: Platform.OS === 'ios' ? 10 : 0,
+    // paddingBottom: 20
   },
   tabBarItemStyle: {
 //     justifyContent: "center",

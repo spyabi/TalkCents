@@ -263,7 +263,7 @@ const balance = Math.round((totalIncome - totalExpense) * 100) / 100;
 
 //  STYLES
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'white' },
+  container: { flex: 1, backgroundColor: '#ffffff' },
 
   scrollContent: { padding: 20, paddingBottom: 120 },
 

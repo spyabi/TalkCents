@@ -145,7 +145,7 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#e5e7eb',
     backgroundColor: c.bg,
-    marginBottom: 80,
+    marginBottom: 120,
   },
   logoutButton: {
     alignSelf: 'stretch',

@@ -189,6 +189,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#111827',
     marginBottom: 32,
+    paddingTop: 10,
   },
   card: {
     width: width * 0.86,   

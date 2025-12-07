@@ -64,7 +64,7 @@ const FloatingButton = () => {
       <Animated.View
         style={[
           styles.circleSmall,
-          { bottom: icon_2_1, right: icon_2_2 },
+          { right: icon_3 },
         ]}
       >
         <TouchableOpacity onPress={() => {navigation.navigate("ChatBot");}}>
@@ -78,7 +78,7 @@ const FloatingButton = () => {
       <Animated.View
         style={[
           styles.circleSmall,
-          { right: icon_3 },
+          { bottom: icon_2_1, right: icon_2_2 },
         ]}
       >
         <TouchableOpacity onPress={() => {navigation.navigate("ManualEntry", { item: null });}}>
