@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   },
   container: {
     width: width * 0.85,      // 85% of screen width
-    height: height * 0.7,      // 60% of screen height
+    height: height * 0.5,      // 60% of screen height
     padding: 10,
     borderRadius: 12,
     backgroundColor: 'rgba(255,255,255,1.0)', // white

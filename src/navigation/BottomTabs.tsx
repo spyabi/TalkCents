@@ -40,7 +40,7 @@ export default function BottomTabs() {
           tabBarIcon: ({ color, size }) => (
             <Icon name={ICONS[route.name]} size={size} color={color} />
           ),
-          tabBarActiveTintColor: '#9DB7FF',
+          tabBarActiveTintColor: '#466bd0ff',
           tabBarInactiveTintColor: '#000000',
           headerShown: false,
           tabBarStyle: styles.tabBar,

@@ -119,7 +119,7 @@ export default function HomeScreen() {
       setItems([]);
     }
   }, []);
-
+ 
   // /expenditure/approved -> totals by category + grand total
   const loadSpending = useCallback(async () => {
     try {
@@ -375,15 +375,15 @@ function PendingRow({
       <View style={styles.pendingActions}>
         {/* Edit */}
         <TouchableOpacity style={styles.iconBtn} onPress={onEdit}>
-          <Icon name="pencil" size={16} color="#fff" />
+          <Icon name="pencil" size={16} color="#00000" />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.iconBtn} onPress={onDelete}>
-          <Icon name="trash" size={16} color="#fff" />
+          <Icon name="trash" size={16} color="#00000" />
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.iconBtn} onPress={onConfirm}>
-          <Icon name="checkmark-circle" size={18} color="green" />
+          <Icon name="checkmark-circle" size={18} color="00000" />
         </TouchableOpacity>
       </View>
     </View>
@@ -524,7 +524,7 @@ const styles = StyleSheet.create({
     backgroundColor: c.primary,
     paddingVertical: 6,
     paddingHorizontal: 16,
-    borderRadius: 10,
+    borderRadius: 5,
   },
   approveAllText: {
     color: '#ffffff',
@@ -578,7 +578,6 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 6,
-    backgroundColor: c.text,
     alignItems: 'center',
     justifyContent: 'center',
   },
