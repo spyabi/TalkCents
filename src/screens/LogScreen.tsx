@@ -301,29 +301,29 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
+    gap: 30
   },
   summaryItem:{
     alignItems: 'center',
-    flex: 1
   },
   summaryLabel: { 
-    fontSize: 20, 
+    fontSize: 18, 
     fontWeight: '500',
     marginBottom: 4
   },
   expenseValue: { 
     color: '#FF0000', 
-    fontSize: 22, 
+    fontSize: 18, 
     fontWeight: '500' 
   },
   incomeValue: { 
     color: '#1AC100', 
-    fontSize: 22, 
+    fontSize: 18, 
     fontWeight: '500' 
   },
   balanceValue: { 
     color: 'black', 
-    fontSize: 22, 
+    fontSize: 18, 
     fontWeight: '500' 
   },
   bigBox: {
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
 
   groupHeader: {
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
     marginBottom: 10,
   },
 
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
 
-  cardTitle: { fontSize: 16, fontWeight: '600' },
+  cardTitle: { fontSize: 16, fontWeight: '500' },
   cardCategory: { color: '#777', fontSize: 13 },
 
   cardRight: { flexDirection: 'row', alignItems: 'center' },
