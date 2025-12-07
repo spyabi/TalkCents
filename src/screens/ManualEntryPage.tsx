@@ -599,15 +599,12 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#000',
   },
-
-
-
   toggleContainer: {
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
     marginBottom: 20,
     gap: 28,
-    paddingHorizontal: 4,
+    paddingHorizontal: 20,
   },
 
   toggleBtn: {
