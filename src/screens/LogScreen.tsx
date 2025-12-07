@@ -154,17 +154,17 @@ export default function LogScreen({ navigation }: Props) {
         {/* SUMMARY CARD */}
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
-            <View>
+            <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Expense</Text>
               <Text style={styles.expenseValue}>${totalExpense}</Text>
             </View>
 
-            <View>
+            <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Income</Text>
               <Text style={styles.incomeValue}>${totalIncome}</Text>
             </View>
 
-            <View>
+            <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Balance</Text>
               <Text style={styles.balanceValue}>${balance}</Text>
             </View>
@@ -177,8 +177,8 @@ export default function LogScreen({ navigation }: Props) {
             <Text style={styles.emptyText}>No transactions this month.</Text>
           </View>
         ) : (
-          <View style={styles.monthContainer}>
-            {sortedDates.map(date => {
+          <View style={styles.bigBox}>
+            {sortedDates.map((date, index) => {
               const items = grouped[date];
               const d = new Date(date);
 
@@ -225,13 +225,17 @@ export default function LogScreen({ navigation }: Props) {
                           <Icon
                             name="trash"
                             size={20}
-                            color="red"
+                            color="black"
                             style={styles.deleteIcon}
                           />
                         </TouchableOpacity>
                       </View>
                     </View>
                   ))}
+                  {/*divider */}
+                  {index < sortedDates.length - 1 && (
+                    <View style ={styles.divider} />
+                  )}
                 </View>
               );
             })}
@@ -281,29 +285,58 @@ const styles = StyleSheet.create({
   },
 
   summaryCard: {
-    backgroundColor: '#D4EFF3',
+    backgroundColor: '#rgba(145, 185, 250, 0.2)',
     padding: 25,
-    borderRadius: 20,
+    borderRadius: 3,
     marginBottom: 25,
   },
 
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    alignItems: 'center'
+  },
+  summaryItem:{
+    alignItems: 'center',
+    flex: 1
+  },
+  summaryLabel: { 
+    fontSize: 20, 
+    fontWeight: '500',
+    marginBottom: 4
+  },
+  expenseValue: { 
+    color: '#FF0000', 
+    fontSize: 22, 
+    fontWeight: '500' 
+  },
+  incomeValue: { 
+    color: '#1AC100', 
+    fontSize: 22, 
+    fontWeight: '500' 
+  },
+  balanceValue: { 
+    color: 'black', 
+    fontSize: 22, 
+    fontWeight: '500' 
+  },
+  bigBox: {
+    backgroundColor: 'white',
+    padding: 13,
+    borderRadius: 3,
+    marginBottom: 0,
+    flexGrow: 1,
+
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
 
-  summaryLabel: { fontSize: 20, fontWeight: '700' },
-  expenseValue: { color: 'red', fontSize: 22, fontWeight: '600' },
-  incomeValue: { color: 'green', fontSize: 22, fontWeight: '600' },
-  balanceValue: { color: 'black', fontSize: 22, fontWeight: '600' },
-
   groupContainer: {
-    backgroundColor: '#D4EFF3',
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    borderRadius: 20,
     marginBottom: 20,
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
 
   groupHeader: {
@@ -313,22 +346,18 @@ const styles = StyleSheet.create({
   },
 
   card: {
-    backgroundColor: 'white',
-    padding: 14,
-    borderRadius: 15,
-    marginBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    overflow: 'hidden',
+    paddingVertical: 12,
   },
 
   cardTitle: { fontSize: 16, fontWeight: '600' },
-  cardCategory: { color: 'gray', fontSize: 12 },
+  cardCategory: { color: '#777', fontSize: 13 },
 
   cardRight: { flexDirection: 'row', alignItems: 'center' },
   cardLeft: { flex: 1 },
-  editIcon: { marginLeft: 10 },
+  editIcon: { marginLeft: 20 },
   deleteIcon: { marginLeft: 20 },
 
   addButton: {
@@ -349,11 +378,12 @@ const styles = StyleSheet.create({
     marginTop: -4,
   },
   monthContainer: {
-    backgroundColor: '#D4EFF3',
+    backgroundColor: 'white',
     paddingVertical: 20,
     paddingHorizontal: 15,
     borderRadius: 20,
     marginBottom: 30,
+    shadowColor: "black"
   },
 
   emptyContainer: {
@@ -367,4 +397,15 @@ const styles = StyleSheet.create({
     color: '#777',
     fontStyle: 'italic',
   },
+  divider:{
+    height: 1,
+    backgroundColor: '#E2E2E2',
+    width: '100%',
+    marginTop: 10,
+    marginBottom: 10,
+  }
 });
+
+
+
+
