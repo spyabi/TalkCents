@@ -424,36 +424,36 @@ const styles = StyleSheet.create({
     marginVertical: 20,
     marginTop: 60,
   },
-  segmentWrapper: {
-    flexDirection: 'row',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 3,
-    overflow: 'hidden',
-    marginBottom: 20,
-    alignSelf: 'center',
-  },
-  segment: {
-    flex: 1,
-    paddingVertical: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#FFFFFF',
-  },
+  // segmentWrapper: {
+  //   flexDirection: 'row',
+  //   borderWidth: 1,
+  //   borderColor: '#E5E7EB',
+  //   borderRadius: 3,
+  //   overflow: 'hidden',
+  //   marginBottom: 20,
+  //   alignSelf: 'center',
+  // },
+  // segment: {
+  //   flex: 1,
+  //   paddingVertical: 12,
+  //   alignItems: 'center',
+  //   justifyContent: 'center',
+  //   backgroundColor: '#FFFFFF',
+  // },
 
-  segmentActive: {
-    backgroundColor: 'rgba(145, 185, 250, 0.2)',
-  },
+  // segmentActive: {
+  //   backgroundColor: 'rgba(145, 185, 250, 0.2)',
+  // },
 
-  segmentText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#00000',
-  },
+  // segmentText: {
+  //   fontSize: 16,
+  //   fontWeight: '600',
+  //   color: '#00000',
+  // },
 
-  segmentTextActive: {
-    color: '#006EA2',
-  },
+  // segmentTextActive: {
+  //   color: '#006EA2',
+  // },
   inputGroup: {
     marginBottom: 18,
   },
