@@ -39,16 +39,16 @@ export default function BottomTabs() {
           tabBarIcon: ({ color, size }) => (
             <Icon name={ICONS[route.name]} size={size} color={color} />
           ),
-          tabBarActiveTintColor: '#007AFF',
+          tabBarActiveTintColor: '#9DB7FF',
           tabBarInactiveTintColor: '#000000',
           headerShown: false,
           tabBarStyle: styles.tabBar,
           tabBarItemStyle: styles.tabBarItemStyle
         })}
       > 
+      <Tab.Screen name="Insights" component={InsightScreen} />
         <Tab.Screen name="Home" component={HomeScreen} />
         <Tab.Screen name="Log" component={LogScreen} /> 
-        <Tab.Screen name="Insights" component={InsightScreen} />
         <Tab.Screen name="Settings" component={SettingScreen} />
       </Tab.Navigator>
       <FloatingButton/>

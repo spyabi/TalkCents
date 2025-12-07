@@ -26,6 +26,8 @@ type PendingItem = {
   name: string;
   amount: number;
   category: string;
+  date?: string;
+  note?: string;
 };
 type LegendItem = {
   label: string;
@@ -43,9 +45,9 @@ type RootStackParamList = {
 
 /* ---------- stable helpers OUTSIDE the component ---------- */
 const COLORS = [
-  '#7aa8ab',
-  '#bfe7ee',
-  '#d8f3f7',
+  '#214971',
+  '#7fa7d9',
+  '#c7ddff',
   '#a3c7d3',
   '#6e9fa8',
   '#cfe8ee',
@@ -155,8 +157,8 @@ export default function HomeScreen() {
   // memoize SVG slices to keep render stable
   const pieSlices = useMemo(() => {
     const r = 85;
-    const cx = 85,
-      cy = 85;
+    const cx = 85;
+    const cy = 85;
     let angle = -90;
     return legendData.map((seg, idx) => {
       const sweep = (seg.percent / 100) * 360;
@@ -183,7 +185,7 @@ export default function HomeScreen() {
         <Text style={styles.title}>TalkCents</Text>
 
         {/* Pie */}
-        <View style={styles.pieWrap}>
+        {/* <View style={styles.pieWrap}>
           {legendData.length ? (
             <Svg width={170} height={170}>
               {pieSlices}
@@ -204,16 +206,36 @@ export default function HomeScreen() {
           <Text style={styles.pieLabel}>
             {legendData.length ? 'Spending by category' : 'No data'}
           </Text>
-        </View>
+        </View> */}
 
         {/* Total from backend */}
-        <View style={{ alignItems: 'center', marginTop: 6 }}>
-          <Text style={styles.totalTitle}>total expenditure</Text>
+        {/* <View style={{ alignItems: 'center', marginTop: 6 }}>
+          <Text style={styles.totalTitle}>Total expenditure</Text>
           <Text style={styles.totalValue}>${totalSpent.toFixed(2)}</Text>
-        </View>
+        </View> */} 
+
+        {/* Top: pie + total card */}
+          <View style={styles.topRow}>
+            <View style={styles.pieCard}>
+              {legendData.length ? (
+                <Svg width={150} height={150}>
+                  {pieSlices}
+                </Svg>
+              ) : (
+                <View style={styles.pieFallback} />
+              )}
+            </View>
+
+            <View style={styles.totalCard}>
+              <Text style={styles.totalCardTitle}>Total Expenditure</Text>
+              <Text style={styles.totalCardValue}>
+                ${totalSpent.toFixed(2)}
+              </Text>
+            </View>
+          </View>
 
         {/* Legend */}
-        <View style={styles.legend}>
+        {/* <View style={styles.legend}>
           {legendData.map(it => (
             <View key={it.label} style={styles.legendItem}>
               <View style={[styles.dot, { backgroundColor: it.color }]} />
@@ -225,49 +247,60 @@ export default function HomeScreen() {
           {!legendData.length && (
             <Text style={styles.legendText}>No categories yet.</Text>
           )}
-        </View>
+        </View> */}
+
+        <View style={styles.legend}>
+            {legendData.length ? (
+              legendData.map(it => (
+                <View key={it.label} style={styles.legendItem}>
+                  <View
+                    style={[styles.dot, { backgroundColor: it.color }]}
+                  />
+                  <Text style={styles.legendText}>{it.label}</Text>
+                </View>
+              ))
+            ) : (
+              <Text style={styles.legendEmpty}>No categories yet.</Text>
+            )}
+          </View>
 
         {/* Pending list */}
         <View style={styles.pendingCard}>
-          <View style={styles.pendingHeaderRow}>
-            <Text style={styles.pendingTitle}>Pending</Text>
+            <View style={styles.pendingHeaderRow}>
+              <Text style={styles.pendingTitle}>Pending</Text>
+              {items.length > 0 && (
+                <TouchableOpacity
+                  style={styles.approveAllBtn}
+                  onPress={handleApproveAll}
+                >
+                  <Text style={styles.approveAllText}>Approve All</Text>
+                </TouchableOpacity>
+              )}
+            </View>
 
-            {/* 🟢 NEW APPROVE ALL BUTTON */}
-            {items.length > 0 && (
-              <TouchableOpacity
-                style={styles.approveAllBtn}
-                onPress={handleApproveAll}
-              >
-                <Text style={styles.approveAllText}>
-                  Approve All ({items.length})
-                </Text>
-              </TouchableOpacity>
-            )}
+            <FlatList
+              data={items}
+              keyExtractor={i => i.id}
+              renderItem={({ item }) => (
+                <PendingRow
+                  label={item.name}
+                  amount={item.amount}
+                  category={item.category}
+                  date={item.date}
+                  onEdit={() => goToLog(item)}
+                  onConfirm={() => handleApprove(item.id)}
+                  onDelete={() => handleDelete(item.id)}
+                />
+              )}
+              ListEmptyComponent={
+                <Text style={styles.emptyText}>No pending items.</Text>
+              }
+              ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+              refreshing={refreshing}
+              onRefresh={onRefresh}
+            />
           </View>
-          <FlatList
-            data={items}
-            keyExtractor={i => i.id}
-            renderItem={({ item }) => (
-              <PendingRow
-                label={item.name}
-                amount={item.amount}
-                category={item.category}
-                onEdit={() => goToLog(item)}
-                onConfirm={() => handleApprove(item.id)}
-                onDelete={() => handleDelete(item.id)}
-              />
-            )}
-            ListEmptyComponent={
-              <Text style={{ color: '#64748b', paddingVertical: 8 }}>
-                No pending items.
-              </Text>
-            }
-            ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
-            refreshing={refreshing}
-            onRefresh={onRefresh}
-          />
-        </View>
-      </ScrollView>
+        </ScrollView>
     </SafeAreaView>
   );
 }
@@ -276,6 +309,7 @@ function PendingRow({
   label,
   amount,
   category,
+  date,
   onEdit,
   onConfirm,
   onDelete,
@@ -283,6 +317,7 @@ function PendingRow({
   label: string;
   amount: number;
   category: string;
+  date?: string;
   onEdit: () => void;
   onConfirm: () => void;
   onDelete: () => void;
@@ -294,7 +329,8 @@ function PendingRow({
     <View style={styles.pendingRow}>
       <View style={styles.pendingDetails}>
         <Text style={styles.pendingLabel}>{label}</Text>
-        <Text style={styles.pendingCategory}>{category}</Text>
+        <Text style={styles.pendingSub}>{date ? date : category}</Text>
+        {/* <Text style={styles.pendingCategory}>{category}</Text> */}
       </View>
 
       <View style={styles.pendingAmountContainer}>
@@ -323,44 +359,122 @@ function PendingRow({
 
 /* ---------------- styles ---------------- */
 const c = {
-  bg: '#FFFFFF',
-  tint: '#cfe8ee',
-  tintDark: '#9ecad2',
-  text: '#0f172a',
-  muted: '#475569',
-  card: '#e9f5f7',
-  shadow: '#00000033',
+  bg: '#ffffff',
+  pageBg: '#f5f7fb',
+  primary: '#7b8cf9',
+  accent: '#3EB6C5',
+  text: '#111827',
+  muted: '#6b7280',
+  card: '#ffffff',
+  shadow: '#00000020',
+  pendingChip: '#f1f5f9',
+  amountRed: '#e11d48',
 };
 
 const styles = StyleSheet.create({
-  safe: { flex: 1, backgroundColor: c.bg },
-  container: { paddingHorizontal: 20, paddingBottom: 140 },
+  safe: {
+    flex: 1,
+    backgroundColor: c.bg,
+  },
+  pageBg: {
+    flex: 1,
+    backgroundColor: c.pageBg,
+  },
+  container: {
+    paddingHorizontal: 20,
+    paddingTop: 8,
+    paddingBottom: 32, // no need for big padding since fab is removed
+  },
   title: {
     fontSize: 28,
     fontWeight: '700',
     textAlign: 'center',
-    marginTop: 8,
-    marginBottom: 10,
+    marginTop: 4,
+    marginBottom: 18,
     color: c.text,
   },
-  pieWrap: { alignItems: 'center', justifyContent: 'center', flex: 1 },
-  pieLabel: { marginTop: 6, color: c.muted, fontSize: 12 },
-  totalTitle: { fontSize: 14, fontWeight: '700', color: c.text, marginTop: 8 },
-  totalValue: { fontSize: 22, fontWeight: '800' },
-  legend: {
-    flexDirection: 'column',
-    marginTop: 10,
-    gap: 8,
-    paddingHorizontal: 8,
+
+  topRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
-  legendItem: { flexDirection: 'row', alignItems: 'center' },
-  dot: { width: 14, height: 14, borderRadius: 7, marginRight: 10 },
-  legendText: { color: c.muted },
+  pieCard: {
+    width: 180,
+    height: 180,
+    borderRadius: 90,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  pieFallback: {
+    width: 150,
+    height: 150,
+    borderRadius: 75,
+    backgroundColor: COLORS[1],
+  },
+
+  totalCard: {
+    flex: 1,
+    marginLeft: 10,
+    paddingVertical: 18,
+    paddingHorizontal: 12,
+    backgroundColor: '#e6eefc',
+    borderRadius: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: c.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  totalCardTitle: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: c.text,
+    marginBottom: 8,
+  },
+  totalCardValue: {
+    fontSize: 26,
+    fontWeight: '800',
+    color: c.text,
+  },
+
+  legend: {
+    marginTop: 14,
+    marginBottom: 8,
+    paddingHorizontal: 4,
+  },
+  legendItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  dot: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    marginRight: 8,
+  },
+  legendText: {
+    color: c.muted,
+    fontSize: 13,
+  },
+  legendEmpty: {
+    color: c.muted,
+    fontSize: 13,
+  },
+
   pendingCard: {
-    marginTop: 16,
+    marginTop: 18,
     padding: 14,
     backgroundColor: c.card,
-    borderRadius: 18,
+    borderRadius: 20,
+    shadowColor: c.shadow,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.35,
+    shadowRadius: 10,
+    elevation: 5,
   },
   pendingHeaderRow: {
     flexDirection: 'row',
@@ -368,55 +482,64 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 10,
   },
-  approveAllBtn: {
-    backgroundColor: '#3EB6C5',
-    paddingVertical: 5,
-    paddingHorizontal: 10,
-    borderRadius: 8,
-  },
-  approveAllText: {
-    color: 'white',
-    fontWeight: '600',
-    fontSize: 14,
-  },
-
   pendingTitle: {
     fontSize: 16,
     fontWeight: '700',
+    color: c.text,
+  },
+  approveAllBtn: {
+    backgroundColor: c.primary,
+    paddingVertical: 6,
+    paddingHorizontal: 16,
+    borderRadius: 10,
+  },
+  approveAllText: {
+    color: '#ffffff',
+    fontWeight: '600',
+    fontSize: 13,
+  },
+  emptyText: {
+    color: c.muted,
+    marginTop: 4,
   },
 
   pendingRow: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    backgroundColor: c.tint,
-    borderRadius: 10,
+    backgroundColor: c.pendingChip,
+    borderRadius: 12,
     paddingVertical: 10,
     paddingHorizontal: 12,
   },
+  pendingDetails: {
+    flex: 2,
+    paddingRight: 10,
+  },
+  pendingLabel: {
+    color: c.text,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  pendingSub: {
+    fontSize: 11,
+    color: c.muted,
+    marginTop: 2,
+  },
   pendingAmountContainer: {
-    flex: 3.0,
+    flex: 1.1,
     alignItems: 'flex-start',
     justifyContent: 'center',
-    marginRight: 10,
   },
   pendingAmount: {
     fontSize: 16,
     fontWeight: '700',
-  },
-  pendingDetails: {
-    flex: 1.5,
-    paddingRight: 10,
-  },
-  pendingLabel: { color: c.text },
-  pendingCategory: {
-    fontSize: 12,
-    color: c.muted,
-    marginTop: 2,
+    color: c.amountRed,
   },
   pendingActions: {
     flexDirection: 'row',
-    gap: 8,
+    alignItems: 'center',
+    gap: 6,
   },
   iconBtn: {
     width: 28,
@@ -427,7 +550,104 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   iconText: {},
-
-  deleteIcon: {},
-  editIcon: {},
 });
+
+// const styles = StyleSheet.create({
+//   safe: { flex: 1, backgroundColor: c.bg },
+//   container: { paddingHorizontal: 20, paddingBottom: 140 },
+//   title: {
+//     fontSize: 28,
+//     fontWeight: '700',
+//     textAlign: 'center',
+//     marginTop: 8,
+//     marginBottom: 10,
+//     color: c.text,
+//   },
+//   pieWrap: { alignItems: 'center', justifyContent: 'center', flex: 1 },
+//   pieLabel: { marginTop: 6, color: c.muted, fontSize: 12 },
+//   totalTitle: { fontSize: 14, fontWeight: '700', color: c.text, marginTop: 8 },
+//   totalValue: { fontSize: 22, fontWeight: '800' },
+//   legend: {
+//     flexDirection: 'column',
+//     marginTop: 10,
+//     gap: 8,
+//     paddingHorizontal: 8,
+//   },
+//   legendItem: { flexDirection: 'row', alignItems: 'center' },
+//   dot: { width: 14, height: 14, borderRadius: 7, marginRight: 10 },
+//   legendText: { color: c.muted },
+//   pendingCard: {
+//     marginTop: 16,
+//     padding: 14,
+//     backgroundColor: c.card,
+//     borderRadius: 18,
+//   },
+//   pendingHeaderRow: {
+//     flexDirection: 'row',
+//     justifyContent: 'space-between',
+//     alignItems: 'center',
+//     marginBottom: 10,
+//   },
+//   approveAllBtn: {
+//     backgroundColor: '#3EB6C5',
+//     paddingVertical: 5,
+//     paddingHorizontal: 10,
+//     borderRadius: 8,
+//   },
+//   approveAllText: {
+//     color: 'white',
+//     fontWeight: '600',
+//     fontSize: 14,
+//   },
+
+//   pendingTitle: {
+//     fontSize: 16,
+//     fontWeight: '700',
+//   },
+
+//   pendingRow: {
+//     flexDirection: 'row',
+//     alignItems: 'center',
+//     justifyContent: 'space-between',
+//     backgroundColor: c.tint,
+//     borderRadius: 10,
+//     paddingVertical: 10,
+//     paddingHorizontal: 12,
+//   },
+//   pendingAmountContainer: {
+//     flex: 3.0,
+//     alignItems: 'flex-start',
+//     justifyContent: 'center',
+//     marginRight: 10,
+//   },
+//   pendingAmount: {
+//     fontSize: 16,
+//     fontWeight: '700',
+//   },
+//   pendingDetails: {
+//     flex: 1.5,
+//     paddingRight: 10,
+//   },
+//   pendingLabel: { color: c.text },
+//   pendingCategory: {
+//     fontSize: 12,
+//     color: c.muted,
+//     marginTop: 2,
+//   },
+//   pendingActions: {
+//     flexDirection: 'row',
+//     gap: 8,
+//   },
+//   iconBtn: {
+//     width: 28,
+//     height: 28,
+//     borderRadius: 6,
+//     backgroundColor: c.text,
+//     alignItems: 'center',
+//     justifyContent: 'center',
+//   },
+//   iconText: {},
+
+//   deleteIcon: {},
+//   editIcon: {},
+// });

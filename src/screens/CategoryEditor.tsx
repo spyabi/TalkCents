@@ -102,38 +102,77 @@ export default function CategoryEditor({ route }: Props) {
 
 /* ---- styles ---- */
 const c = {
-  bg: '#FFFFFF',
-  card: '#e6f3f6',
+  bg: '#f7fbff',        // soft blue background like Login/Chatbot
+  card: '#e6f0ff',      // light blue card
   text: '#0f172a',
   muted: '#64748b',
   dark: '#0f172a',
+  accent: '#9DB7FF',    // same accent as FAB / theme
+  danger: '#FF3B30',
 };
 
 const styles = StyleSheet.create({
-  root: { flex: 1, backgroundColor: c.bg, paddingHorizontal: 16, paddingTop: 8 },
-  title: { fontSize: 22, fontWeight: '700', color: c.dark, marginBottom: 12, textAlign: 'center' },
+  root: {
+    flex: 1,
+    backgroundColor: c.bg,
+    paddingHorizontal: 16,
+    paddingTop: 16,
+  },
+  title: {
+    fontSize: 22,
+    fontWeight: '700',
+    color: c.dark,
+    marginBottom: 16,
+    textAlign: 'center',
+  },
 
   inputRow: { flexDirection: 'row', gap: 10, marginBottom: 12 },
   input: {
-    flex: 1, height: 44, borderRadius: 10, paddingHorizontal: 12,
-    backgroundColor: c.card, color: c.text,
+    flex: 1,
+    height: 44,
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    backgroundColor: c.card,
+    color: c.text,
   },
   addBtn: {
-    width: 44, height: 44, borderRadius: 10, backgroundColor: '#000',
-    alignItems: 'center', justifyContent: 'center',
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: c.accent,   // was #000
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  addTxt: { color: '#fff', fontSize: 24, lineHeight: 24, fontWeight: '800' },
+  addTxt: {
+    color: '#fff',
+    fontSize: 24,
+    lineHeight: 24,
+    fontWeight: '800',
+  },
 
   row: {
-    flexDirection: 'row', alignItems: 'center',
-    backgroundColor: c.card, borderRadius: 12, paddingVertical: 12, paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: c.card,
+    borderRadius: 12,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
   },
   rowLabel: { flex: 1, color: c.text, fontSize: 16 },
   delBtn: {
-    width: 32, height: 32, borderRadius: 8, backgroundColor: '#ef4444',
-    alignItems: 'center', justifyContent: 'center',
+    width: 32,
+    height: 32,
+    borderRadius: 8,
+    backgroundColor: c.danger,   // was #ef4444
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  delTxt: { color: '#fff', fontWeight: '800', fontSize: 18, lineHeight: 18 },
+  delTxt: {
+    color: '#fff',
+    fontWeight: '800',
+    fontSize: 18,
+    lineHeight: 18,
+  },
 
   empty: { color: c.muted, textAlign: 'center', marginTop: 16 },
 });

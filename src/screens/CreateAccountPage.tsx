@@ -19,9 +19,9 @@ export default function CreateAccountPage({ navigation }: Props) {
     <LinearGradient
       //colors={['#0099CC', '#7DF1FF', '#B3EBF2', '#EAF8FB']} // gradient colors
       //colors={['#00C8FF', '#7DF1FF', '#B3EBF2', '#E6F7F9']}
-      colors={['#00C8FF', '#7DF1FF', '#A4F0F3', '#B3EBF2', '#D6F7F9']}
-      start={{ x: 0.5, y: 0 }}     // top-middle
-      end={{ x: 1, y: 1 }}       // bottom-right
+      colors={['#f7fbff', '#e2ecff', '#d4e2ff']}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
       style={styles.background}
     >
       <View style={styles.container}>

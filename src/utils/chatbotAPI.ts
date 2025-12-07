@@ -10,8 +10,8 @@ import type { Message, Expense } from '../screens/ChatBotScreen.tsx';
 //   content: ChatMessageContent[];
 // };
 
-const API_URL = 'http://18.234.224.108:8000/api/llm';
-const API_EXPENDITURE_URL = 'http://18.234.224.108:8000/api/expenditure'
+const API_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app/llm';
+const API_EXPENDITURE_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app/expenditure'
 
 export async function sendChatMessage(messages: Message[]) {
 //   future check for token

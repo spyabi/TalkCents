@@ -85,6 +85,9 @@ export default function LogScreen({ navigation }: Props) {
     'December',
   ];
 
+  const formatMoney = (n: number) =>
+  Number.isFinite(n) ? n.toFixed(2) : '0.00';
+
   const monthLabel = `${monthNames[selectedMonth]} ${selectedYear}`;
 
   type LogScreenRouteProp = RouteProp<AuthStackParamList, 'Log'>;
@@ -105,15 +108,18 @@ export default function LogScreen({ navigation }: Props) {
     return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
   });
 
-  const totalExpense = filtered
-    .filter(t => t.type === 'Expense')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
+ const rawExpense = filtered
+  .filter(t => t.type === 'Expense')
+  .reduce((sum, t) => sum + Number(t.amount), 0);
 
-  const totalIncome = filtered
-    .filter(t => t.type === 'Income')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
+const rawIncome = filtered
+  .filter(t => t.type === 'Income')
+  .reduce((sum, t) => sum + Number(t.amount), 0);
 
-  const balance = totalIncome - totalExpense;
+// round to 2 dp to avoid 2971.6800000000003
+const totalExpense = Math.round(rawExpense * 100) / 100;
+const totalIncome = Math.round(rawIncome * 100) / 100;
+const balance = Math.round((totalIncome - totalExpense) * 100) / 100;
 
   //  GROUPING
   const grouped = filtered.reduce((acc: Record<string, Transaction[]>, t) => {
@@ -156,17 +162,17 @@ export default function LogScreen({ navigation }: Props) {
           <View style={styles.summaryRow}>
             <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Expense</Text>
-              <Text style={styles.expenseValue}>${totalExpense}</Text>
+              <Text style={styles.expenseValue}>${formatMoney(totalExpense)}</Text>
             </View>
 
             <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Income</Text>
-              <Text style={styles.incomeValue}>${totalIncome}</Text>
+              <Text style={styles.incomeValue}>${formatMoney(totalIncome)}</Text>
             </View>
 
             <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Balance</Text>
-              <Text style={styles.balanceValue}>${balance}</Text>
+              <Text style={styles.balanceValue}>${formatMoney(balance)}</Text>
             </View>
           </View>
         </View>
