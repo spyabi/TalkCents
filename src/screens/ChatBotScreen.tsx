@@ -86,6 +86,8 @@ I’ll parse everything and ask for your approval before saving!`
       ],
     },
   ]);
+  const lastMessage = messages[messages.length - 1];
+  const isLastMessageByBot = lastMessage?.role === 'assistant';
 
 
   const getAndroidPermission = async () => {
@@ -197,7 +199,7 @@ I’ll parse everything and ask for your approval before saving!`
         }]
       };
       setMessages(prev => [...prev, newBotError]);
-      console.error('permissions', 'Error sending chat message:', err);
+      //console.error('permissions', 'Error sending chat message:', err);
     }
   };
 
@@ -510,8 +512,9 @@ I’ll parse everything and ask for your approval before saving!`
               <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
                 <TouchableOpacity
                   onPress={() => openCameraScreen()}
-                  style={styles.iconButton}>
-                  <Icon name="camera" size={30} color="#007AFF" />
+                  style={styles.iconButton}
+                  disabled={!isLastMessageByBot}>
+                  <Icon name="camera" size={30} color={isLastMessageByBot ? '#007AFF' : '#A0A0A0'} />
                 </TouchableOpacity>
 
                 {/* Text input UI*/}
@@ -531,8 +534,9 @@ I’ll parse everything and ask for your approval before saving!`
                   onPress={() => {
                     if (message.trim()) sendMessage();
                     else startRecording();
-                  }}>
-                  <Icon name={message.trim() ? 'send-sharp' : 'mic'} size={30} color="#007AFF" />
+                  }}
+                  disabled={!isLastMessageByBot}>
+                  <Icon name={message.trim() ? 'send-sharp' : 'mic'} size={30} color={isLastMessageByBot ? '#007AFF' : '#A0A0A0'} />
                 </TouchableOpacity>
               </View>
             )}
