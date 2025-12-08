@@ -38,7 +38,7 @@ type MessageContent =
 
 
 export type Message = {
-  role: 'user' | 'assistant' | 'waiting';
+  role: 'user' | 'assistant';
   content: MessageContent[]
 };
 
@@ -88,6 +88,8 @@ I’ll parse everything and ask for your approval before saving!`
   ]);
   const lastMessage = messages[messages.length - 1];
   const isLastMessageByBot = lastMessage?.role === 'assistant';
+  //waiting for reply
+  const [isWaiting, setIsWaiting] = useState(false);
 
 
   const getAndroidPermission = async () => {
@@ -128,13 +130,9 @@ I’ll parse everything and ask for your approval before saving!`
           text: message.trim()
         }]
       };
-      const waitingMessage: Message = {
-        role: 'waiting',
-        content: [{ type: 'text', text: 'Please wait for a reply...' }]
-      };
       //use local variable to pass api call, react state updates only changes later
       const updatedChatHistory = [...chatHistory, newMessage];
-      setMessages(prev => [...prev, newMessage, waitingMessage]);
+      setMessages(prev => [...prev, newMessage]);
       setchatHistory(updatedChatHistory);
       console.log('permissions', "I SET CHAT HISTORY");
       console.log('permissions', messages);
@@ -142,6 +140,7 @@ I’ll parse everything and ask for your approval before saving!`
       //reset the user message text box
       setMessage('');
       setInputHeight(40); // reset text input height
+      setIsWaiting(true);
       // 3. Send to API
       await handleBotResponse(updatedChatHistory);
     }
@@ -149,7 +148,7 @@ I’ll parse everything and ask for your approval before saving!`
   const handleBotResponse = async (updatedChatHistory: Message[]) => {
     try {
       const botResponse = await sendChatMessage(updatedChatHistory);
-
+      setIsWaiting(false);
       // 4. Add bot message to UI
       if (botResponse?.response?.length) {
         const newBotMessage: Message = {
@@ -159,8 +158,6 @@ I’ll parse everything and ask for your approval before saving!`
             text: botResponse.response
           }]
         };
-        // Remove "waiting" messages
-        setMessages(prev => prev.filter(msg => msg.role !== 'waiting'));
         setMessages(prev => [...prev, newBotMessage]);
         setchatHistory(prev => [...prev, newBotMessage]);
       }
@@ -197,15 +194,18 @@ I’ll parse everything and ask for your approval before saving!`
         setMessages(prev => [...prev, newBotExpense]);
       }
     } catch (err) {
-      const newBotError: Message = {
-        role: 'assistant',
-        content: [{
-          type: 'text',
-          text: "There was an issue getting your response, please try again"
-        }]
-      };
-      setMessages(prev => prev.filter(msg => msg.role !== 'waiting'));
-      setMessages(prev => [...prev, newBotError]);
+      // Delay before showing error message
+      setTimeout(() => {
+          const newBotError: Message = {
+            role: 'assistant',
+            content: [{
+              type: 'text',
+              text: "There was an issue getting your response, please try again"
+            }]
+          };
+          setIsWaiting(false);
+          setMessages(prev => [...prev, newBotError]);
+        }, 500);
       //console.error('permissions', 'Error sending chat message:', err);
     }
   };
@@ -499,6 +499,11 @@ I’ll parse everything and ask for your approval before saving!`
                 ) : null }
               </View>
             ))}
+            {isWaiting && (
+              <View style={[styles.messageBubble, styles.botBubble]}>
+                <Text>Please wait for a reply...</Text>
+              </View>
+            )}
           {/*</ScrollView>*/}
           </KeyboardAwareScrollView>
           {/* Input area */}
