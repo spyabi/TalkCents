@@ -38,7 +38,7 @@ type MessageContent =
 
 
 export type Message = {
-  role: 'user' | 'assistant';
+  role: 'user' | 'assistant' | 'waiting';
   content: MessageContent[]
 };
 
@@ -128,9 +128,13 @@ I’ll parse everything and ask for your approval before saving!`
           text: message.trim()
         }]
       };
+      const waitingMessage: Message = {
+        role: 'waiting',
+        content: [{ type: 'text', text: 'Please wait for a reply...' }]
+      };
       //use local variable to pass api call, react state updates only changes later
       const updatedChatHistory = [...chatHistory, newMessage];
-      setMessages(prev => [...prev, newMessage]);
+      setMessages(prev => [...prev, newMessage, waitingMessage]);
       setchatHistory(updatedChatHistory);
       console.log('permissions', "I SET CHAT HISTORY");
       console.log('permissions', messages);
@@ -155,6 +159,8 @@ I’ll parse everything and ask for your approval before saving!`
             text: botResponse.response
           }]
         };
+        // Remove "waiting" messages
+        setMessages(prev => prev.filter(msg => msg.role !== 'waiting'));
         setMessages(prev => [...prev, newBotMessage]);
         setchatHistory(prev => [...prev, newBotMessage]);
       }
@@ -198,6 +204,7 @@ I’ll parse everything and ask for your approval before saving!`
           text: "There was an issue getting your response, please try again"
         }]
       };
+      setMessages(prev => prev.filter(msg => msg.role !== 'waiting'));
       setMessages(prev => [...prev, newBotError]);
       //console.error('permissions', 'Error sending chat message:', err);
     }
