@@ -175,8 +175,9 @@ const styles = StyleSheet.create({
   },
   page: {
     flex: 1,
-    alignItems: 'center',
-    paddingTop: 80,
+    justifyContent: "center",
+    alignItems: "center",
+    paddingTop: 0,
   },
   logoText: {
     fontSize: 24,
