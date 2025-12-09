@@ -12,7 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { AuthStackParamList } from '../navigation/AppStack';
-import { useTransactions, Transaction, budget } from '../utils/TransactionsContext';
+import { useTransactions, Transaction } from '../utils/TransactionsContext';
 import FloatingButton from '../components/FloatingButton';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Log'>;
@@ -121,6 +121,7 @@ const rawIncome = filtered
 const totalExpense = Math.round(rawExpense * 100) / 100;
 const totalIncome = Math.round(rawIncome * 100) / 100;
 const balance = Math.round((totalIncome - totalExpense) * 100) / 100;
+const budget_left = Math.round((budget - totalExpense) * 100) / 100;
 
   //  GROUPING
   const grouped = filtered.reduce((acc: Record<string, Transaction[]>, t) => {
@@ -172,8 +173,12 @@ const balance = Math.round((totalIncome - totalExpense) * 100) / 100;
             </View>
 
             <View style={styles.summaryItem}>
+              {/*
               <Text style={styles.summaryLabel}>Balance</Text>
               <Text style={styles.balanceValue}>${formatMoney(balance)}</Text>
+              */}
+              <Text style={styles.summaryLabel}>Budget Left</Text>
+              <Text style={styles.balanceValue}>${formatMoney(budget_left)}</Text>
             </View>
           </View>
         </View>
