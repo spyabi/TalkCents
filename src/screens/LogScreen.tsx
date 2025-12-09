@@ -176,9 +176,20 @@ const budget_left = Math.round((budget - totalExpense) * 100) / 100;
               {/*
               <Text style={styles.summaryLabel}>Balance</Text>
               <Text style={styles.balanceValue}>${formatMoney(balance)}</Text>
+
+              <Text style={styles.balanceValue}>${formatMoney(budget_left)}</Text>
               */}
               <Text style={styles.summaryLabel}>Budget Left</Text>
-              <Text style={styles.balanceValue}>${formatMoney(budget_left)}</Text>
+              {budget === 0 ? (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("Settings")}
+                  style={styles.setBudgetButton}
+                >
+                  <Text style={styles.setBudgetText}>Set Budget</Text>
+                </TouchableOpacity>
+              ) : (
+                <Text style={styles.balanceValue}>${formatMoney(budget_left)}</Text>
+              )}
             </View>
           </View>
         </View>
@@ -313,7 +324,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   summaryLabel: { 
-    fontSize: 18, 
+    fontSize: 18,
     fontWeight: '500',
     marginBottom: 4
   },
@@ -415,7 +426,17 @@ const styles = StyleSheet.create({
     width: '100%',
     marginTop: 10,
     marginBottom: 10,
-  }
+  },
+  setBudgetButton: {
+    backgroundColor: "#3399FF",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+  },
+  setBudgetText: {
+    color: "white",
+    fontWeight: "600",
+  },
 });
 
 
