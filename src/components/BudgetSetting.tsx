@@ -1,48 +1,71 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert } from 'react-native';
+import { useTransactions } from '../utils/TransactionsContext';
 
-type BudgetSettingProps = {
-  initialBudget: number; // start with number
-  onSave: (newBudget: number) => void; // parent receives numeric value
-  loading: boolean;
-};
+export default function BudgetSetting() {
+  const { budget, updateBudget, refreshBudget } = useTransactions();
+  const [localBudget, setLocalBudget] = useState<string>('');
+  const [loading, setLoading] = useState(false);
 
-export default function BudgetSetting({
-  initialBudget,
-  onSave,
-  loading,
-}: BudgetSettingProps) {
-  const [budget, setBudget] = useState<string>(initialBudget.toString());
-
-  // If parent changes initialBudget, update local state
+  // Fetch the latest budget on mount
   useEffect(() => {
-    setBudget(initialBudget.toString());
-  }, [initialBudget]);
+    const loadBudget = async () => {
+      await refreshBudget();
+    };
+    loadBudget();
+  }, [refreshBudget]);
 
-  const handleSave = () => {
-    const numericBudget = parseFloat(budget);
-    if (isNaN(numericBudget) || numericBudget < 0) {
+  // Sync local input if context budget changes
+  useEffect(() => {
+    setLocalBudget(budget?.toString() || '');
+    console.log('permissions MY LOCAL BUDGET', localBudget)
+  }, [budget]);
+
+  useFocusEffect(
+    React.useCallback(() => {
+      // Reset localBudget to the current budget whenever screen comes into focus
+      setLocalBudget(budget?.toString() || '');
+    }, [budget])
+  );
+
+  const handleSave = async () => {
+    const numeric = parseFloat(localBudget);
+    if (isNaN(numeric) || numeric < 0) {
       alert('Please enter a valid budget amount.');
       return;
     }
-    onSave(numericBudget);
+
+    try {
+      setLoading(true);
+      await updateBudget(numeric);
+      setLoading(false);
+      Alert.alert('Budget updated successfully.');
+    } catch (err) {
+      setLoading(false);
+      console.error('Error updating budget', err);
+      Alert.alert('Failed to update budget.');
+    }
   };
+
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>Budget Setting</Text>
-
       <View style={styles.inputRow}>
         <TextInput
           style={styles.input}
-          placeholder={parseFloat(budget) === 0 || budget === '' ? 'No budget set yet' : ''}
+          placeholder={budget === 0 ? 'No budget set yet' : ''}
           keyboardType="numeric"
-          value={parseFloat(budget) === 0 ? '' : budget}
-          onChangeText={setBudget}
+          value={localBudget === '' ? '' : localBudget}
+          onChangeText={setLocalBudget}
           editable={!loading}
         />
-
-        <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={loading}>
+        <TouchableOpacity
+          style={styles.saveButton}
+          onPress={handleSave}
+          disabled={loading}
+        >
           <Text style={styles.saveButtonText}>{loading ? '...' : 'Save'}</Text>
         </TouchableOpacity>
       </View>
@@ -50,13 +73,9 @@ export default function BudgetSetting({
   );
 }
 
+
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#cbd5e1',
-  },
+  container: { paddingHorizontal: 16, paddingVertical: 12, borderBottomWidth: StyleSheet.hairlineWidth, borderBottomColor: '#cbd5e1' },
   label: { fontSize: 16, marginBottom: 8 },
   inputRow: { flexDirection: 'row', alignItems: 'center' },
   input: {
@@ -68,11 +87,6 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     marginRight: 8,
   },
-  saveButton: {
-    backgroundColor: '#000',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    borderRadius: 8,
-  },
+  saveButton: { backgroundColor: '#000', paddingHorizontal: 16, paddingVertical: 10, borderRadius: 8 },
   saveButtonText: { color: '#fff', fontWeight: '700' },
 });

@@ -12,7 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useRoute, RouteProp } from '@react-navigation/native';
 import { AuthStackParamList } from '../navigation/AppStack';
-import { useTransactions, Transaction } from '../utils/TransactionsContext';
+import { useTransactions, Transaction, budget } from '../utils/TransactionsContext';
 import FloatingButton from '../components/FloatingButton';
 
 type Props = NativeStackScreenProps<AuthStackParamList, 'Log'>;
@@ -20,13 +20,14 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Log'>;
 export default function LogScreen({ navigation }: Props) {
   const today = new Date();
 
-  const { transactions, deleteTransaction, refreshTransactions } =
+  const { transactions, deleteTransaction, refreshTransactions, budget, refreshBudget } =
     useTransactions();
 
   useFocusEffect(
     useCallback(() => {
       refreshTransactions();
-    }, [refreshTransactions]),
+      refreshBudget();
+    }, [refreshTransactions, refreshBudget]),
   );
 
   const handleDelete = (id: string) => {

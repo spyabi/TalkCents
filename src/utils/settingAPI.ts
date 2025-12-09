@@ -37,6 +37,6 @@ export async function updateBudget(monthlyBudget: number) {
   }
 
   const data = await res.json();
-  console.log("Updated budget:", data);
+  console.log("permissions BUDGET", data);
   return data;
 }
