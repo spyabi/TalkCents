@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,10 +11,22 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { logoutUser } from '../utils/auth';
+import BudgetSetting from '../components/BudgetSetting';
+import { getBudget, updateBudget } from '../utils/settingAPI';
 
 export default function SettingScreen() {
   const navigation = useNavigation();
   const [notify, setNotify] = useState(true);
+
+  const [budget, setBudget] = useState<number | null>(null);
+
+  useEffect(() => {
+    const load = async () => {
+      const data = await getBudget(); // token handled inside
+      setBudget(parseFloat(data.monthly_budget));
+    };
+    load();
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -44,7 +56,30 @@ export default function SettingScreen() {
         // @ts-ignore
         navigation.navigate('CategoryEditor', { type: 'expense' })
       } />
+      {/*
       <ListItem label="Budget Setting" />
+      */}
+      {budget !== null && (
+        <BudgetSetting
+          initialBudget={budget}
+          onSave={async (newBudget) => {
+            try {
+              console.log("permissions my fucking save budget", newBudget)
+              const numericBudget = parseFloat(newBudget.toString());
+              if (isNaN(numericBudget) || numericBudget < 0) {
+                Alert.alert('Invalid', 'Please enter a valid budget amount.');
+                return;
+              }
+              await updateBudget(numericBudget); // correct call
+              setBudget(numericBudget);
+              Alert.alert('Success', 'Budget updated successfully.');
+            } catch (err) {
+              console.log("Error updating budget", err);
+              Alert.alert('Error', 'Failed to update budget.');
+            }
+            }}
+        />
+      )}
 
         </View>
 
