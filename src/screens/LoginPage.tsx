@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, Alert } from 'react-native';
+import { KeyboardAvoidingView, Platform, View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import { loginUser } from '../utils/auth';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -48,8 +48,12 @@ export default function LoginPage({ navigation }: Props) {
       start={{ x: 0.5, y: 0 }}
       end={{ x: 0.5, y: 1 }}
       style={styles.background}
-    >
-      <View style={styles.page}>
+    > 
+      <KeyboardAvoidingView
+        style={styles.page} 
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0} 
+      >
         <Image source={require('../assets/TalkCents_logo.png')} style={styles.logo} />
 
         {/* Subtitle */}
@@ -105,7 +109,7 @@ export default function LoginPage({ navigation }: Props) {
             </Text>
           </Text>
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </LinearGradient>
   );
 }
