@@ -19,6 +19,7 @@
     "react-native": "0.82.1",
     "react-native-fs": "^2.20.0",
     "react-native-gesture-handler": "^2.29.1",
+    "react-native-gifted-charts": "^1.4.70",
     "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-keychain": "^10.0.0",
     "react-native-linear-gradient": "^2.8.3",
@@ -31,8 +32,7 @@
     "react-native-svg": "^15.15.0",
     "react-native-vector-icons": "^10.3.0",
     "react-native-vision-camera": "^4.7.2",
-    "react-native-worklets": "^0.6.1",
-    "victory-native": "^41.20.2"
+    "react-native-worklets": "^0.6.1"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
