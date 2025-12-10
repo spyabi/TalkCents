@@ -28,6 +28,7 @@ class AnalyticsWidget(private val context: Context) {
         // Placeholder text until data is loaded
         views.setTextViewText(R.id.analytics_today, "Spent today: Loading...")
         views.setTextViewText(R.id.analytics_month, "Monthly expenditure: Loading...")
+        views.setTextViewText(R.id.analytics_budget, "Budget Left: Loading...")
 
         // Cancel button to go back to SimpleWidget
         val cancelIntent = Intent(context, SimpleWidget::class.java).apply {
@@ -70,10 +71,27 @@ class AnalyticsWidget(private val context: Context) {
                     monthTotal += monthArray.getJSONObject(i).optInt("amount", 0)
                 }
 
+                // 3️⃣ Fetch Budget Left (monthly_budget)
+                val budgetUrl = URL("https://talkcents-backend-7r52622dga-as.a.run.app/api/user/budget")
+                val budgetRaw = getApiData(budgetUrl, token)
+                val budgetJson = JSONObject(budgetRaw)
+
+                // monthly_budget could be 120, 120.0 optDouble handles all numeric cases
+                val monthlyBudget = budgetJson.optDouble("monthly_budget", 0.0)
+
+                val budgetText = if (monthlyBudget == 0.0) {
+                    "Budget Left: No budget set yet"
+                } else {
+                    val budgetLeft = monthlyBudget - monthTotal
+                    "Budget Left: ${budgetLeft.toInt()}"
+                }
+
+
                 // Build updated RemoteViews
                 val updatedViews = RemoteViews(context.packageName, R.layout.analytics_widget_layout)
                 updatedViews.setTextViewText(R.id.analytics_today, "Spent today: $todayTotal")
                 updatedViews.setTextViewText(R.id.analytics_month, "Monthly expenditure: $monthTotal")
+                updatedViews.setTextViewText(R.id.analytics_budget, budgetText)
                 updatedViews.setOnClickPendingIntent(R.id.icon_cancel_button, cancelPending)
 
                 // Apply to the widget
