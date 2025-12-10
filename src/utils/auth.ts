@@ -3,7 +3,7 @@ import * as Keychain from 'react-native-keychain';
 import { NativeModules } from 'react-native';
 const { MySecureStorage } = NativeModules;
 
-
+export const BASE_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app';
 const API_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app/user';
 
 export async function loginUser(email: string, password: string): Promise<string> {
