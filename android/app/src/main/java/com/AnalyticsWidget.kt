@@ -51,7 +51,7 @@ class AnalyticsWidget(private val context: Context) {
                 val todayStr = today.format(formatter)
 
                 // 1️⃣ Fetch today expenditure
-                val todayUrl = URL("http://18.234.224.108:8000/api/expenditure/date_filter?start_date=$todayStr&end_date=$todayStr")
+                val todayUrl = URL("https://talkcents-backend-7r52622dga-as.a.run.app/api/expenditure/date_filter?start_date=$todayStr&end_date=$todayStr")
                 val todayDataRaw = getApiData(todayUrl, token)
                 val todayArray = JSONArray(todayDataRaw)
                 var todayTotal = 0
@@ -62,7 +62,7 @@ class AnalyticsWidget(private val context: Context) {
                 // 2️⃣ Fetch this month expenditure
                 val firstDay = today.withDayOfMonth(1)
                 val lastDay = today.withDayOfMonth(today.lengthOfMonth())
-                val monthUrl = URL("http://18.234.224.108:8000/api/expenditure/date_filter?start_date=${firstDay.format(formatter)}&end_date=${lastDay.format(formatter)}")
+                val monthUrl = URL("https://talkcents-backend-7r52622dga-as.a.run.app/api/expenditure/date_filter?start_date=${firstDay.format(formatter)}&end_date=${lastDay.format(formatter)}")
                 val monthDataRaw = getApiData(monthUrl, token)
                 val monthArray = JSONArray(monthDataRaw)
                 var monthTotal = 0

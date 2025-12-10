@@ -37,7 +37,7 @@ class MySecureStorageAndroid(private val context: Context) {
 
         Thread {
             val isValid = try {
-                val url = URL("http://18.234.224.108:8000/api/user/me")
+                val url = URL("https://talkcents-backend-7r52622dga-as.a.run.app/api/user/me")
                 val conn = (url.openConnection() as HttpURLConnection).apply {
                     requestMethod = "GET"
                     setRequestProperty("Authorization", "Bearer $token")

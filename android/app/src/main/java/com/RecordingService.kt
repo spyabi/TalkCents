@@ -26,7 +26,7 @@ class RecordingService : Service() {
         const val NOTIF_CHANNEL_ID = "RecordingServiceChannel"
         const val NOTIF_ID = 101
         const val BROADCAST_UPDATE = "com.talkcents.RECORDING_UPDATE"
-        const val BACKEND_URL = "http://18.234.224.108:8000/api/llm/audio-to-expenditure"
+        const val BACKEND_URL = "https://talkcents-backend-7r52622dga-as.a.run.app/api/llm/audio-to-expenditure"
     }
 
     private var isRecording = false
