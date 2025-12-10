@@ -8,6 +8,7 @@ import { NewAppScreen } from '@react-native/new-app-screen';
 import { StatusBar, StyleSheet, useColorScheme, View } from 'react-native';
 import {
   SafeAreaProvider,
+  SafeAreaView,
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import { NavigationContainer } from '@react-navigation/native';
@@ -34,7 +35,7 @@ function AppContent() {
   const safeAreaInsets = useSafeAreaInsets();
 
   return (
-    <View style={{flex:1, backgroundColor: '#E7F0FF'}}>
+    <SafeAreaView style={{flex:1, backgroundColor: '#E7F0FF'}}>
       {/* <LoginPage/> */}
       {/* <BottomTabs/>
       <FloatingButton/> */}
@@ -43,7 +44,7 @@ function AppContent() {
           <AppStack />
         </NavigationContainer>
       </TransactionsProvider>
-    </View>
+    </SafeAreaView>
   );
 }
 

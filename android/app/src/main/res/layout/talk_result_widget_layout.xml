@@ -2,7 +2,7 @@
     android:id="@+id/talk_result_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#bae7ec">
+    android:background="#C8DDFF">
 
     <!-- Title -->
     <TextView
