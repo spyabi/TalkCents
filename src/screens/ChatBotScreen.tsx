@@ -274,6 +274,7 @@ I’ll parse everything and ask for your approval before saving!`
           text: transcription.transcription
         }]
       };
+      setMessages(prev => [...prev, newMessage]);
       const updatedChatHistory = [...chatHistory, newMessage];
       setchatHistory(updatedChatHistory);
 
