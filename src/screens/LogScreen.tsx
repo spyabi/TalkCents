@@ -20,13 +20,14 @@ type Props = NativeStackScreenProps<AuthStackParamList, 'Log'>;
 export default function LogScreen({ navigation }: Props) {
   const today = new Date();
 
-  const { transactions, deleteTransaction, refreshTransactions } =
+  const { transactions, deleteTransaction, refreshTransactions, budget, refreshBudget } =
     useTransactions();
 
   useFocusEffect(
     useCallback(() => {
       refreshTransactions();
-    }, [refreshTransactions]),
+      refreshBudget();
+    }, [refreshTransactions, refreshBudget]),
   );
 
   const handleDelete = (id: string) => {
@@ -85,6 +86,9 @@ export default function LogScreen({ navigation }: Props) {
     'December',
   ];
 
+  const formatMoney = (n: number) =>
+  Number.isFinite(n) ? n.toFixed(2) : '0.00';
+
   const monthLabel = `${monthNames[selectedMonth]} ${selectedYear}`;
 
   type LogScreenRouteProp = RouteProp<AuthStackParamList, 'Log'>;
@@ -105,15 +109,19 @@ export default function LogScreen({ navigation }: Props) {
     return d.getMonth() === selectedMonth && d.getFullYear() === selectedYear;
   });
 
-  const totalExpense = filtered
-    .filter(t => t.type === 'Expense')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
+ const rawExpense = filtered
+  .filter(t => t.type === 'Expense')
+  .reduce((sum, t) => sum + Number(t.amount), 0);
 
-  const totalIncome = filtered
-    .filter(t => t.type === 'Income')
-    .reduce((sum, t) => sum + Number(t.amount), 0);
+const rawIncome = filtered
+  .filter(t => t.type === 'Income')
+  .reduce((sum, t) => sum + Number(t.amount), 0);
 
-  const balance = totalIncome - totalExpense;
+// round to 2 dp to avoid 2971.6800000000003
+const totalExpense = Math.round(rawExpense * 100) / 100;
+const totalIncome = Math.round(rawIncome * 100) / 100;
+const balance = Math.round((totalIncome - totalExpense) * 100) / 100;
+const budget_left = Math.round((budget - totalExpense) * 100) / 100;
 
   //  GROUPING
   const grouped = filtered.reduce((acc: Record<string, Transaction[]>, t) => {
@@ -154,19 +162,34 @@ export default function LogScreen({ navigation }: Props) {
         {/* SUMMARY CARD */}
         <View style={styles.summaryCard}>
           <View style={styles.summaryRow}>
-            <View>
+            <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Expense</Text>
-              <Text style={styles.expenseValue}>${totalExpense}</Text>
+              <Text style={styles.expenseValue}>${formatMoney(totalExpense)}</Text>
             </View>
 
-            <View>
+            <View style={styles.summaryItem}>
               <Text style={styles.summaryLabel}>Income</Text>
-              <Text style={styles.incomeValue}>${totalIncome}</Text>
+              <Text style={styles.incomeValue}>${formatMoney(totalIncome)}</Text>
             </View>
 
-            <View>
+            <View style={styles.summaryItem}>
+              {/*
               <Text style={styles.summaryLabel}>Balance</Text>
-              <Text style={styles.balanceValue}>${balance}</Text>
+              <Text style={styles.balanceValue}>${formatMoney(balance)}</Text>
+
+              <Text style={styles.balanceValue}>${formatMoney(budget_left)}</Text>
+              */}
+              <Text style={styles.summaryLabel}>Budget Left</Text>
+              {budget === 0 ? (
+                <TouchableOpacity
+                  onPress={() => navigation.navigate("Settings")}
+                  style={styles.setBudgetButton}
+                >
+                  <Text style={styles.setBudgetText}>Set Budget</Text>
+                </TouchableOpacity>
+              ) : (
+                <Text style={styles.balanceValue}>${formatMoney(budget_left)}</Text>
+              )}
             </View>
           </View>
         </View>
@@ -177,8 +200,8 @@ export default function LogScreen({ navigation }: Props) {
             <Text style={styles.emptyText}>No transactions this month.</Text>
           </View>
         ) : (
-          <View style={styles.monthContainer}>
-            {sortedDates.map(date => {
+          <View style={styles.bigBox}>
+            {sortedDates.map((date, index) => {
               const items = grouped[date];
               const d = new Date(date);
 
@@ -225,13 +248,17 @@ export default function LogScreen({ navigation }: Props) {
                           <Icon
                             name="trash"
                             size={20}
-                            color="red"
+                            color="black"
                             style={styles.deleteIcon}
                           />
                         </TouchableOpacity>
                       </View>
                     </View>
                   ))}
+                  {/*divider */}
+                  {index < sortedDates.length - 1 && (
+                    <View style ={styles.divider} />
+                  )}
                 </View>
               );
             })}
@@ -253,7 +280,7 @@ export default function LogScreen({ navigation }: Props) {
 
 //  STYLES
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: 'white' },
+  container: { flex: 1, backgroundColor: '#ffffff' },
 
   scrollContent: { padding: 20, paddingBottom: 120 },
 
@@ -281,54 +308,79 @@ const styles = StyleSheet.create({
   },
 
   summaryCard: {
-    backgroundColor: '#D4EFF3',
+    backgroundColor: '#rgba(145, 185, 250, 0.2)',
     padding: 25,
-    borderRadius: 20,
+    borderRadius: 3,
     marginBottom: 25,
   },
 
   summaryRow: {
     flexDirection: 'row',
     justifyContent: 'space-around',
+    alignItems: 'center',
+    gap: 30
+  },
+  summaryItem:{
+    alignItems: 'center',
+  },
+  summaryLabel: { 
+    fontSize: 18,
+    fontWeight: '500',
+    marginBottom: 4
+  },
+  expenseValue: { 
+    color: '#FF0000', 
+    fontSize: 18, 
+    fontWeight: '500' 
+  },
+  incomeValue: { 
+    color: '#1AC100', 
+    fontSize: 18, 
+    fontWeight: '500' 
+  },
+  balanceValue: { 
+    color: 'black', 
+    fontSize: 18, 
+    fontWeight: '500' 
+  },
+  bigBox: {
+    backgroundColor: 'white',
+    padding: 13,
+    borderRadius: 3,
+    marginBottom: 0,
+    flexGrow: 1,
+
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 2 },
+    elevation: 2,
   },
 
-  summaryLabel: { fontSize: 20, fontWeight: '700' },
-  expenseValue: { color: 'red', fontSize: 22, fontWeight: '600' },
-  incomeValue: { color: 'green', fontSize: 22, fontWeight: '600' },
-  balanceValue: { color: 'black', fontSize: 22, fontWeight: '600' },
-
   groupContainer: {
-    backgroundColor: '#D4EFF3',
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    borderRadius: 20,
     marginBottom: 20,
-    overflow: 'hidden',
+    overflow: 'hidden'
   },
 
   groupHeader: {
-    fontSize: 18,
-    fontWeight: '700',
-    marginBottom: 10, // reduced from 15
+    fontSize: 16,
+    fontWeight: '600',
+    marginBottom: 10,
   },
 
   card: {
-    backgroundColor: 'white',
-    padding: 14,
-    borderRadius: 15,
-    marginBottom: 10,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    overflow: 'hidden',
+    paddingVertical: 12,
   },
 
-  cardTitle: { fontSize: 16, fontWeight: '600' },
-  cardCategory: { color: 'gray', fontSize: 12 },
+  cardTitle: { fontSize: 16, fontWeight: '500' },
+  cardCategory: { color: '#777', fontSize: 13 },
 
   cardRight: { flexDirection: 'row', alignItems: 'center' },
   cardLeft: { flex: 1 },
-  editIcon: { marginLeft: 10 },
+  editIcon: { marginLeft: 20 },
   deleteIcon: { marginLeft: 20 },
 
   addButton: {
@@ -349,11 +401,12 @@ const styles = StyleSheet.create({
     marginTop: -4,
   },
   monthContainer: {
-    backgroundColor: '#D4EFF3',
+    backgroundColor: 'white',
     paddingVertical: 20,
     paddingHorizontal: 15,
     borderRadius: 20,
     marginBottom: 30,
+    shadowColor: "black"
   },
 
   emptyContainer: {
@@ -367,4 +420,25 @@ const styles = StyleSheet.create({
     color: '#777',
     fontStyle: 'italic',
   },
+  divider:{
+    height: 1,
+    backgroundColor: '#E2E2E2',
+    width: '100%',
+    marginTop: 10,
+    marginBottom: 10,
+  },
+  setBudgetButton: {
+    backgroundColor: "#3399FF",
+    paddingVertical: 4,
+    paddingHorizontal: 8,
+    borderRadius: 4,
+  },
+  setBudgetText: {
+    color: "white",
+    fontWeight: "600",
+  },
 });
+
+
+
+

@@ -3,8 +3,8 @@ import * as Keychain from 'react-native-keychain';
 import { NativeModules } from 'react-native';
 const { MySecureStorage } = NativeModules;
 
-
-const API_URL = 'http://18.234.224.108:8000/api/user';
+export const BASE_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app';
+const API_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app/user';
 
 export async function loginUser(email: string, password: string): Promise<string> {
   console.log('permissions', 'Keychain module:', Keychain);
@@ -29,19 +29,19 @@ export async function loginUser(email: string, password: string): Promise<string
   // Securely store token
   await Keychain.setGenericPassword('user', token, { service: 'TalkCentsAuthToken' });
 
-  const tokenresult = await MySecureStorage.getToken();
-  console.log('permissions', 'MY CURRENT TOKEN', tokenresult)
+  // const tokenresult = await MySecureStorage.getToken();
+  // console.log('permissions', 'MY CURRENT TOKEN', tokenresult)
   // Store in native secure storage module
-  if (MySecureStorage?.saveToken) {
-    try {
-      MySecureStorage.saveToken(token);
-      const tokenresult2 = await MySecureStorage.getToken();
-      console.log('permissions', 'MY CURRENT TOKEN', tokenresult2)
-      console.log('permissions', 'Token saved via MySecureStorage');
-    } catch (err) {
-      console.warn('permissions', 'Error saving token in MySecureStorage:', err);
-    }
-  }
+//   if (MySecureStorage?.saveToken) {
+//     try {
+//       MySecureStorage.saveToken(token);
+//       const tokenresult2 = await MySecureStorage.getToken();
+//       console.log('permissions', 'MY CURRENT TOKEN', tokenresult2)
+//       console.log('permissions', 'Token saved via MySecureStorage');
+//     } catch (err) {
+//       console.warn('permissions', 'Error saving token in MySecureStorage:', err);
+//     }
+//   }
   return token;
 }
 
@@ -86,21 +86,21 @@ export async function getToken(): Promise<string | null> {
 export async function logoutUser(): Promise<void> {
   try {
     const credentialsBefore = await Keychain.getGenericPassword({ service: 'TalkCentsAuthToken' });
-    console.log('permissions', 'MY TOKEN BEFORE:', credentialsBefore?.password);
+    // console.log('permissions', 'MY TOKEN BEFORE:', credentialsBefore?.password);
 
     // Reset / delete credentials
     await Keychain.resetGenericPassword({ service: 'TalkCentsAuthToken' });
 
     const credentialsAfter = await Keychain.getGenericPassword({ service: 'TalkCentsAuthToken' });
-    console.log('permissions', 'MY TOKEN AFTER:', credentialsAfter?.password); // should be undefined / null
+    // console.log('permissions', 'MY TOKEN AFTER:', credentialsAfter?.password); // should be undefined / null
   } catch (error) {
     console.error('Error logging out:', error);
   }
 
-  try {
-    const result = await MySecureStorage.removeToken();
-    console.log("permissions", "Token removed:", result); // true
-  } catch (err) {
-    console.error("permissions", "Failed to remove token:", err);
-  }
+  // try {
+  //   const result = await MySecureStorage.removeToken();
+  //   console.log("permissions", "Token removed:", result); // true
+  // } catch (err) {
+  //   console.error("permissions", "Failed to remove token:", err);
+  // }
 }

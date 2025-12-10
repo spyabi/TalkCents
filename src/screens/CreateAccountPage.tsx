@@ -19,9 +19,9 @@ export default function CreateAccountPage({ navigation }: Props) {
     <LinearGradient
       //colors={['#0099CC', '#7DF1FF', '#B3EBF2', '#EAF8FB']} // gradient colors
       //colors={['#00C8FF', '#7DF1FF', '#B3EBF2', '#E6F7F9']}
-      colors={['#00C8FF', '#7DF1FF', '#A4F0F3', '#B3EBF2', '#D6F7F9']}
-      start={{ x: 0.5, y: 0 }}     // top-middle
-      end={{ x: 1, y: 1 }}       // bottom-right
+      colors={['#f7fbff', '#e2ecff', '#d4e2ff']}
+      start={{ x: 0.5, y: 0 }}
+      end={{ x: 0.5, y: 1 }}
       style={styles.background}
     >
       <View style={styles.container}>
@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   },
   container: {
     width: width * 0.85,      // 85% of screen width
-    height: height * 0.7,      // 60% of screen height
+    height: height * 0.5,      // 60% of screen height
     padding: 10,
     borderRadius: 12,
     backgroundColor: 'rgba(255,255,255,1.0)', // white

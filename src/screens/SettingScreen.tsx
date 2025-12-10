@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,6 +11,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { logoutUser } from '../utils/auth';
+import BudgetSetting from '../components/BudgetSetting';
 
 export default function SettingScreen() {
   const navigation = useNavigation();
@@ -31,7 +32,6 @@ export default function SettingScreen() {
       {/* Main scrollable content */}
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.titleRow}>
-          <Text style={styles.gear}>⚙️</Text>
           <Text style={styles.title}>Settings</Text>
         </View>
 
@@ -45,7 +45,11 @@ export default function SettingScreen() {
         // @ts-ignore
         navigation.navigate('CategoryEditor', { type: 'expense' })
       } />
+      {/*
       <ListItem label="Budget Setting" />
+      */}
+      {/* BudgetSetting now handles its own state via context */}
+      <BudgetSetting />
 
         </View>
 
@@ -83,12 +87,12 @@ function ListItem({ label, isLast, onPress }: { label: string; isLast?: boolean;
 }
 
 const c = {
-  bg: '#FFFFFF',
-  text: '#0f172a',
-  muted: '#475569',
-  tint: '#cfe8ee',
-  card: '#e6f3f6',
-  danger: '#FF3B30',
+  bg: '#f7fbff',          // soft blue background (like login)
+  text: '#111827',
+  muted: '#6b7280',
+  card: '#e6eefc',        // pale blue card (same feel as total card)
+  accent: '#9DB7FF',      // app primary blue
+  danger: '#000000ff',
 };
 
 const styles = StyleSheet.create({
@@ -146,7 +150,7 @@ const styles = StyleSheet.create({
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#e5e7eb',
     backgroundColor: c.bg,
-    marginBottom: 80,
+    marginBottom: 120,
   },
   logoutButton: {
     alignSelf: 'stretch',

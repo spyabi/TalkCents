@@ -6,8 +6,9 @@ import React, {
   useCallback,
 } from 'react';
 import { getToken } from './auth';
+import { getBudget as getBudgetAPI, updateBudget as updateBudgetAPI } from './settingAPI';
 
-const API_URL = 'http://18.234.224.108:8000/api';
+const API_URL = 'https://talkcents-backend-7r52622dga-as.a.run.app';
 
 export type Category = {
   name: string;
@@ -33,6 +34,9 @@ type TransactionsContextType = {
   editTransaction: (tx: Transaction) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
   refreshTransactions: () => Promise<void>;
+  budget: number | null;
+  refreshBudget: () => Promise<void>;
+  updateBudget: (newBudget: number) => Promise<void>;
 };
 
 const TransactionsContext = createContext<TransactionsContextType | null>(null);
@@ -61,8 +65,8 @@ export const TransactionsProvider = ({
       const d = raw.date_of_expense
         ? new Date(raw.date_of_expense)
         : raw.date
-        ? new Date(raw.date)
-        : new Date();
+          ? new Date(raw.date)
+          : new Date();
       return isNaN(d.getTime()) ? new Date().toISOString() : d.toISOString();
     })();
 
@@ -183,6 +187,27 @@ export const TransactionsProvider = ({
     setTransactions(prev => prev.filter(t => t.id !== id));
   };
 
+  const [budget, setBudget] = useState<number | null>(null);
+  //API clals from utils/settingAPI.ts from imports above
+  const refreshBudget = useCallback(async () => {
+    try {
+      const data = await getBudgetAPI(); // call your existing API function
+      setBudget(parseFloat(data.monthly_budget));
+    } catch (error) {
+      console.error('Failed to fetch budget:', error);
+      setBudget(null);
+    }
+  }, []);
+
+  const updateBudget = useCallback(async (newBudget: number) => {
+    try {
+      const data = await updateBudgetAPI(newBudget); // call your existing API function
+      setBudget(parseFloat(data.monthly_budget));
+    } catch (error) {
+      console.error('Failed to update budget:', error);
+    }
+  }, []);
+
   return (
     <TransactionsContext.Provider
       value={{
@@ -193,6 +218,9 @@ export const TransactionsProvider = ({
         editTransaction,
         deleteTransaction,
         refreshTransactions,
+        budget,
+        refreshBudget,
+        updateBudget,
       }}
     >
       {children}

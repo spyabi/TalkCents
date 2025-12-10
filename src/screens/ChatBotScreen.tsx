@@ -86,6 +86,10 @@ I’ll parse everything and ask for your approval before saving!`
       ],
     },
   ]);
+  const lastMessage = messages[messages.length - 1];
+  const isLastMessageByBot = lastMessage?.role === 'assistant';
+  //waiting for reply
+  const [isWaiting, setIsWaiting] = useState(false);
 
 
   const getAndroidPermission = async () => {
@@ -136,6 +140,7 @@ I’ll parse everything and ask for your approval before saving!`
       //reset the user message text box
       setMessage('');
       setInputHeight(40); // reset text input height
+      setIsWaiting(true);
       // 3. Send to API
       await handleBotResponse(updatedChatHistory);
     }
@@ -143,7 +148,7 @@ I’ll parse everything and ask for your approval before saving!`
   const handleBotResponse = async (updatedChatHistory: Message[]) => {
     try {
       const botResponse = await sendChatMessage(updatedChatHistory);
-
+      setIsWaiting(false);
       // 4. Add bot message to UI
       if (botResponse?.response?.length) {
         const newBotMessage: Message = {
@@ -189,15 +194,19 @@ I’ll parse everything and ask for your approval before saving!`
         setMessages(prev => [...prev, newBotExpense]);
       }
     } catch (err) {
-      const newBotError: Message = {
-        role: 'assistant',
-        content: [{
-          type: 'text',
-          text: "There was an issue getting your response, please try again"
-        }]
-      };
-      setMessages(prev => [...prev, newBotError]);
-      console.error('permissions', 'Error sending chat message:', err);
+      // Delay before showing error message
+      setTimeout(() => {
+          const newBotError: Message = {
+            role: 'assistant',
+            content: [{
+              type: 'text',
+              text: "There was an issue getting your response, please try again"
+            }]
+          };
+          setIsWaiting(false);
+          setMessages(prev => [...prev, newBotError]);
+        }, 500);
+      //console.error('permissions', 'Error sending chat message:', err);
     }
   };
 
@@ -490,6 +499,11 @@ I’ll parse everything and ask for your approval before saving!`
                 ) : null }
               </View>
             ))}
+            {isWaiting && (
+              <View style={[styles.messageBubble, styles.botBubble]}>
+                <Text>Please wait for a reply...</Text>
+              </View>
+            )}
           {/*</ScrollView>*/}
           </KeyboardAwareScrollView>
           {/* Input area */}
@@ -510,8 +524,9 @@ I’ll parse everything and ask for your approval before saving!`
               <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
                 <TouchableOpacity
                   onPress={() => openCameraScreen()}
-                  style={styles.iconButton}>
-                  <Icon name="camera" size={30} color="#007AFF" />
+                  style={styles.iconButton}
+                  disabled={!isLastMessageByBot}>
+                  <Icon name="camera" size={30} color={isLastMessageByBot ? '#007AFF' : '#A0A0A0'} />
                 </TouchableOpacity>
 
                 {/* Text input UI*/}
@@ -531,8 +546,9 @@ I’ll parse everything and ask for your approval before saving!`
                   onPress={() => {
                     if (message.trim()) sendMessage();
                     else startRecording();
-                  }}>
-                  <Icon name={message.trim() ? 'send-sharp' : 'mic'} size={30} color="#007AFF" />
+                  }}
+                  disabled={!isLastMessageByBot}>
+                  <Icon name={message.trim() ? 'send-sharp' : 'mic'} size={30} color={isLastMessageByBot ? '#007AFF' : '#A0A0A0'} />
                 </TouchableOpacity>
               </View>
             )}
@@ -543,8 +559,17 @@ I’ll parse everything and ask for your approval before saving!`
   );
 };
 
+const colors = {
+  bg: '#f7fbff',     
+  border: '#d1d5db',
+  userBubble: '#9DB7FF',
+  botBubble: '#E6EEF8',
+  pill: '#dbe4ff',      
+  card: '#ffffff',
+};
+
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#F5F5F5' },
+  container: { flex: 1, backgroundColor: colors.bg },
   inner: { flex: 1 },
   topBar: {
     flexDirection: 'row',
@@ -552,8 +577,8 @@ const styles = StyleSheet.create({
     padding: 12,
     justifyContent: 'space-between',
     borderBottomWidth: 1,
-    borderBottomColor: '#ddd',
-    backgroundColor: '#fff',
+    borderBottomColor: colors.border,
+    backgroundColor: colors.bg,
   },
   titleContainer: { flexDirection: 'row', alignItems: 'center' },
   title: { fontSize: 18, fontWeight: '600', marginLeft: 8 },
@@ -565,11 +590,11 @@ const styles = StyleSheet.create({
     maxWidth: '70%',
   },
   userBubble: {
-    backgroundColor: '#BAE7EC',
+    backgroundColor: colors.userBubble,
     alignSelf: 'flex-end',
   },
   botBubble: {
-    backgroundColor: '#E0E0E0',
+    backgroundColor: colors.botBubble,
     alignSelf: 'flex-start',
   },
   inputRow: {
@@ -578,18 +603,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderTopWidth: 1,
-    borderTopColor: '#ddd',
-    backgroundColor: '#fff',
+    borderTopColor: colors.border,
+    backgroundColor: colors.card,
   },
   textInput: {
     flex: 1,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.border,
     paddingHorizontal: 12,
     paddingVertical: 6,
     marginHorizontal: 6,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
   },
   recordingContainer: {
     flex: 1,
@@ -597,7 +622,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 12,
-    backgroundColor: '#BAE7EC',
+    backgroundColor: colors.pill,
     borderRadius: 20,
     paddingVertical: 10,
     marginBottom:5,
@@ -607,7 +632,7 @@ const styles = StyleSheet.create({
   },
   approveall: {
     marginTop: 8,
-    backgroundColor: '#BAE7EC',
+    backgroundColor: colors.pill,
     paddingVertical: 6,
     paddingHorizontal: 12,
     borderRadius: 10,
