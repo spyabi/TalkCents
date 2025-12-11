@@ -1,19 +1,44 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, Dimensions, Image, Alert } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import TutorialScreen from './TutorialScreen';
 const { width } = Dimensions.get('window');
 const { height } = Dimensions.get('window');
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
 import { AuthStackParamList } from "../navigation/AppStack";
+import { createUser } from "../utils/auth";
 
 type Props = NativeStackScreenProps<AuthStackParamList, "CreateAccount">;
 
 export default function CreateAccountPage({ navigation }: Props) {
 
-  const [email, setEmail] = useState('');
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+
+  const handleCreateAccount = async () => {
+    if (!username.trim() || !password.trim()) {
+      Alert.alert("Error", "Username and password cannot be empty.");
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      Alert.alert("Error", "Passwords do not match.");
+      return;
+    }
+
+    try {
+      console.log("permissions", "Creating account...");
+      await createUser(username.trim(), password.trim());
+
+      // After successful creation, go to tutorial
+      navigation.replace("Tutorial");
+
+    } catch (err: any) {
+      console.log("permissions", "CREATE FAILED", err);
+      Alert.alert("Account Creation Failed", err?.message || "Unable to create account");
+    }
+  };
 
   return (
     <LinearGradient
@@ -28,12 +53,12 @@ export default function CreateAccountPage({ navigation }: Props) {
         <Text style={styles.title}>Create a new account</Text>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.inputLabel}>Username / Email</Text>
+          <Text style={styles.inputLabel}>Username</Text>
           <TextInput
             style={styles.input}
-            placeholder="Enter your username/email"
-            value={email}
-            onChangeText={setEmail}
+            placeholder="Enter your username"
+            value={username}
+            onChangeText={setUsername}
             keyboardType="email-address"
             autoCapitalize="none"
             placeholderTextColor="#999"
@@ -76,7 +101,7 @@ export default function CreateAccountPage({ navigation }: Props) {
           <TouchableOpacity
             style={[styles.button, styles.createButton]}
             // onPress={() => console.log('Create Account pressed')}
-            onPress={() => navigation.replace("Tutorial")}
+            onPress = {handleCreateAccount}
           >
             <Text style={styles.buttonText}>Create Account</Text>
           </TouchableOpacity>

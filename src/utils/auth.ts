@@ -104,3 +104,35 @@ export async function logoutUser(): Promise<void> {
     console.error("permissions", "Failed to remove token:", err);
   }
 }
+
+export async function createUser(username: string, password: string): Promise<string> {
+// Clear any old tokens (safe reset)
+await logoutUser();
+
+console.log('permissions', 'Creating user with:', username);
+
+const response = await fetch(`${API_URL}/register`, {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    username: username,
+    email: `${username}@gmail.com`,
+    password: password,
+    full_name: username
+  }),
+});
+
+if (!response.ok) {
+  console.log('permissions create account', 'I FAILED');
+  throw new Error('User creation failed');
+}
+
+console.log('permissions', 'Account created. Logging in...');
+
+// must login to get token
+const token = await loginUser(username, password);
+
+console.log('permissions', 'Auto-login successful!');
+
+return token;
+}
