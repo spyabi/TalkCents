@@ -383,6 +383,7 @@ I’ll parse everything and ask for your approval before saving!`
       content: messageContent ? [imageContent, messageContent] : [imageContent],
     };
     setMessages(prev => [...prev, newMessage]);
+    setIsWaiting(true);
     const updatedChatHistory = [...chatHistory, newMessage];
     setchatHistory(updatedChatHistory);
     handleBotResponse(updatedChatHistory);
