@@ -1,4 +1,28 @@
-# Things to take note
+# App Overview
+
+## Problem
+Individuals with limited disposable income struggle to consistently track their expenses and budgets because existing finance tracking apps rely on tedious manual input and lack motivating or intelligent features that make the process quick and engaging.
+This app is a modern booking and scheduling platform designed to make court reservations fast, intuitive, and reliable.
+
+## Solution
+Users need an engaging system that reduces the effort required to log expenses accurately by simplifying the user input using AI (through voice / natural language / image input )
+
+
+## Demo & Walkthrough Videos
+
+- App Overview & Features  
+<iframe width="100%" height="400"
+src="https://youtube.com/shorts/fIcpqebRTxk"
+title="App Overview"
+frameborder="0"
+allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+allowfullscreen>
+</iframe>
+
+Link:   
+  https://youtube.com/shorts/fIcpqebRTxk
+
+## Things to take note (if using react native for the first time)
 
 You might need to install JDK 17 for android version to run  
 You might need to have a local.properties file under ./android/ if you do not have ANDROID_HOME set up  
@@ -69,37 +93,3 @@ yarn ios
 If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
 
 This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
