@@ -11,16 +11,9 @@ Users need an engaging system that reduces the effort required to log expenses a
 ## Demo & Walkthrough Videos
 
 - App Overview & Features  
-<iframe width="100%" height="400"
-src="https://youtube.com/shorts/fIcpqebRTxk"
-title="App Overview"
-frameborder="0"
-allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-allowfullscreen>
-</iframe>
+[![Talkcents app overview](https://img.youtube.com/vi/fIcpqebRTxk/hqdefault.jpg)](https://youtube.com/shorts/fIcpqebRTxk)
 
-Link:   
-  https://youtube.com/shorts/fIcpqebRTxk
+Link: https://youtube.com/shorts/fIcpqebRTxk
 
 ## Things to take note (if using react native for the first time)
 
